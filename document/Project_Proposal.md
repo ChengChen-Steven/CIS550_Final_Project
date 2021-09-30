@@ -7,7 +7,7 @@
 - [1. Team Member](#1-team-member)
 - [2. Application Description](#2-application-description)
 - [3. Dataset Overview](#3-dataset-overview)
-    - [3.1 Data Source](#3.1-data-source)
+    - [3.1 Data Source](#31-data-source)
     - [3.2 Database Tables](#3.2-database-tables)
     - [3.3 Outlook](#3.3-outlook)
 - [4. Example Queries](#4-example-queries)
