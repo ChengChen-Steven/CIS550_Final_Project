@@ -17,7 +17,7 @@
 ### __1. Team Member__
 
 * Wenting Zhao, Email: wentingz@seas.upenn.edu, GitHub: Wentinggg  <br>
-* Ruikang Liu, Email: liurk@seas.upenn.edu  GitHub: ruikangpenn  <br>
+* Ruikang Liu, Email: liurk@seas.upenn.edu,  GitHub: ruikangpenn  <br>
 * Puran Zhang, Email: puran@seas.upenn.edu, GitHub: puran-debugger  <br>
 * Cheng Chen, Email: cheng24@seas.upenn.edu, GitHub: ChengChen-Steven  <br><br>
 
