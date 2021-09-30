@@ -70,7 +70,7 @@ __Query #1__: <br>
 Search for specific stock/company basic information/updates based on user's condition filter.
 
 __Query #2__: <br>
-Inter join to get year-to-date cumulating return-on-investment of each stock.
+Inner join to get year-to-date cumulating return-on-investment of each stock.
 
 __Query #3__: <br>
 Select top/bottom 20 performing stocks of the latest trading day to display on homepage.
