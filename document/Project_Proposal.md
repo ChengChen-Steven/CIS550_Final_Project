@@ -23,17 +23,17 @@
 
 
 ### __2. Application Description__
-The application we are building is a multifunctional web app that allows users to quickly retrieve information of stock price, financials and other key stats for the companies of their choice. The app will also provide service for users to search similar stocks to follow or push recommendation of stocks/news to users based on their preference. <br><br>
+The application we are building is a multifunctional web application that allows users to quickly retrieve information of stock price, financials, and other key stats for the companies of their choice. The app will also provide service for users, like searching similar stocks to follow or pushing recommendations of stocks/news to users based on their preference. <br><br>
 
 
 ### __3. Dataset Overview__
 #### __3.1 Data Source__
-We will use a dataset from financial market sites API like Yahoo Finance/AlphaVantage and a dataset from financial news sites API like twitter/bloomberg to filter data to actively inform users with price alert and news/tweets of the companies they follow.
+We will use a dataset from financial market sites API, like Yahoo Finance/AlphaVantage, and a dataset from financial news sites API, like Twitter/Bloomberg, to filter out the data to actively inform users with price alerts and news/tweets of the companies they follow.
 
-We will fetch data from a variety of datasource, including but not limitted to the following:
+We will fetch the data from a variety of data sources, including but not limited to the following:
 
 __Yahoo Finance API:__
-* Description: API that contains stock price information and company information
+* Description: API that contains stock price information and company information.
 * Link: https://github.com/ranaroussi/yfinance 
 
 __Alpha Vantage API:__
@@ -41,11 +41,11 @@ __Alpha Vantage API:__
 * Link: https://www.alphavantage.co/support/#api-key 
 
 __Twitter Developer API:__ 
-* Description: API developed by Twitter where we can search for the related tweets and news about a stock on Twitter, which can be further used for sentiment calculation and news feed information retrieval: 
+* Description: API developed by Twitter where we can search for the related tweets and news about a stock on Twitter, which can be further used for sentiment calculation and news feed information retrieval.
 * Link: https://developer.twitter.com/en/products/twitter-api/enterprise 
 
 __Google Trends API:__ 
-* Description: API developed by Google to provide some information on the popularity of the company
+* Description: API developed by Google to provide some information on the popularity of the companies.
 * Link: https://trends.google.com/trends/?geo=US 
 <br><br>
 
@@ -54,15 +54,15 @@ We will create a few tables in our own database.
 * Stock/Company basic information (MySQL or MongoDB). 
 * Stock historical trading information (MySQL).
 * Stock social feed information and news feed information (MySQL or MongoDB).
-* (TBD) User-level information, login credentials, login history, favoriate stocks, portfolio management. (MySQL or MongoDB).
+* (TBD) User-level information, login credentials, login history, favorite stocks, portfolio management. (MySQL or MongoDB).
 <br><br>
 
 #### __3.3 Outlook__
-Our data collection process is very chanlleging given the complexity in data source unification, data quality sanity check, api reliability, job scheduling and failure retry. Considering different API might have constrains in usage, we will change our data injection accordingly based on the requirement so that we can retain some resilience should error happens. 
+Our data collection process is quite challenging given the complexity in data source unification, data quality sanity check, API reliability, job scheduling and failure retry. Considering different APIs might have constrains in usage, we will change our data injection accordingly based on the requirements so that we can retain some resilience should error happens. 
 
-In our application, we currently won't focus on intra-day minute level data availability given the resource restriction, we will first fetch data after the market closes on each trading day. So we will schedule a cronjob to fetch trading data from the data sources on a daily basis, and first inject the data into our database. Our application will utilize trading data directly from the our own database. 
+In our application, we currently won't focus on intra-day minute level data availability given the resource restriction, we will first fetch the data after the market closes on each trading day. Thus, we will schedule a cronjob to fetch trading data from the data sources on a daily basis, and first inject the data into our database. Our application will utilize trading data directly from our own database. 
 
-We will likely start from a subset of US stocks, for example S&P 500 and later on ramp to all US stocks. In the future, we will consider the expansion to other asset categories, for example, international stocks, Gold/Silver, Futures, Crypto, OTC. We will also consider to integrate with intra-day data and possibly enable trading API to place asset orders. In the meantime, we will be exploring some open source information that we can collect from different sources. <br><br>
+We will likely start from a subset of US stocks, for example S&P 500 and later on ramp to all US stocks. In the future, we will consider the expansion to other asset categories, like international stocks, Gold/Silver, Futures, Crypto, and OTC. We will also consider integrating with intra-day data and possibly enabling trading API to place asset orders. In the meantime, we will be exploring some open-source information that we can collect from different sources. <br><br>
 
 ### __4. Example Queries__
 
@@ -76,7 +76,7 @@ __Query #3__: <br>
 Select top/bottom 20 performing stocks of the latest trading day to display on homepage.
 
 __Query #4__: <br>
-Select top/bottom 3 performing stocks in each industry of the latest trading day to disply on homepage. 
+Select top/bottom 3 performing stocks in each industry of the latest trading day to display on homepage. 
 
 __Query #5__: <br>
 Provide recommendations of similar stocks/companies based on similarity calculation (we will measure and quantify each stock from different aspects.)
