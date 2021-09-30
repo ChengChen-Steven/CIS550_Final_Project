@@ -1,5 +1,6 @@
-### CIS 550 Project Proposal
-<br>
+### CIS 550 Project Proposal 
+https://github.com/ChengChen-Steven/CIS550_Final_Project/blob/main/document/Project_Proposal.md 
+<br><br>
 
 
 ### __Table of Contents__
