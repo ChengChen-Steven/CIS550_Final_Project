@@ -23,7 +23,7 @@
 
 
 ### __2. Application Description__
-The application we are building is a multifunctional web app that allows users to quickly retrieve information of stock price, financials and other key stats for the companies of their choice. The app will also provides service for users to search similar stocks to follow or push recommendation of stocks/news to users based on their preference. <br><br>
+The application we are building is a multifunctional web app that allows users to quickly retrieve information of stock price, financials and other key stats for the companies of their choice. The app will also provide service for users to search similar stocks to follow or push recommendation of stocks/news to users based on their preference. <br><br>
 
 
 ### __3. Dataset Overview__
