@@ -43,7 +43,7 @@ Nowadays we have seen plenty of stock trading apps and stock information sites i
 <br><br>
 
 ### __5. ER diagram__
-![ER Diagram](/er_diagram.png)
+![ER Diagram](/material/er_diagram.png)
 
 ### __6. SQL DDL for creating the database__
 * __Fundamentals__ (symbol, description, name, asset_type, exchange, currency, country, sector, industry, trailingPE, forwardPE, PEG, beta, 52wkhigh, 52wklow, pct_insider, pct_institution, analyst_target, marketcap, profit_margin, short_ratio, PS, PB, book_value)
