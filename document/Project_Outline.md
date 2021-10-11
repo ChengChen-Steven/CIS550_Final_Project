@@ -69,7 +69,7 @@ Nowadays we have seen plenty of stock trading apps and stock information sites i
 <br><br>
 
 ### __9. Description of what each group member will be responsible for__
-* Wenting Zhao, backend, front-end <br>
+* Wenting Zhao, backend, frontend <br>
 * Ruikang Liu, data processing, front-end <br>
-* Puran Zhang, backend, front-end  <br>
-* Cheng Chen, data processing, front-end <br><br>
+* Puran Zhang, data process & backend, frontend  <br>
+* Cheng Chen, data processing, frontend <br><br>
