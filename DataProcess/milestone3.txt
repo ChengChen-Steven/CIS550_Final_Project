@@ -29,8 +29,32 @@ create table Fundamental
 );
 
 
+Query1: The top 5 gainers of each sector; 
+with cte as (
+    select f.sector, row_number() over (partition by f.sector order by q.changePercent desc) as rk
+    from quotes as q
+    inner join fundamental as f
+    on q.symbol = f.symbol 
+)
+select sector, rk
+from cte
+where rk <= 5 
+order by sector, rk
 
- Query1: The top 10 gainers of the day for sector filtered by user:
+Query2: The top 5 losers of each sector; 
+with cte as (
+    select f.sector, row_number() over (partition by f.sector order by q.changePercent asc) as rk
+    from quotes as q
+    inner join fundamental as f
+    on q.symbol = f.symbol 
+)
+select sector, rk
+from cte
+where rk <= 5 
+order by sector, rk
+
+
+Query1: The top 10 gainers of the day for sector filtered by user:
 SELECT q.symbol AS ticker, c.Name AS company, q.changePercent AS percentage
 FROM Quotes q join Fundamental c on q.Symbol = c.Symbol
 WHERE c.sector = "Technology"
