@@ -57,7 +57,7 @@ where rk <= 5
 order by sector, rk
 ```
 
-Query1: The top 10 gainers of the day for sector filtered by user:
+Query3: The top 10 gainers of the day for sector filtered by user:
 ```SQL
 SELECT q.symbol AS ticker, c.Name AS company, q.changePercent AS percentage
 FROM Quotes q join Fundamental c on q.Symbol = c.Symbol
@@ -66,7 +66,7 @@ ORDER BY q.changePercent DESC
 LIMIT 10
 ```
 
-Query2: The top 10 losers of the day for the sector filtered by user
+Query4: The top 10 losers of the day for the sector filtered by user
 ```SQL
 SELECT q.symbol AS ticker, c.Name AS company, q.changePercent AS percentage
 FROM Quotes q join Fundamental c on q.Symbol = c.Symbol
@@ -75,7 +75,7 @@ ORDER BY q.changePercent
 LIMIT 10
 ```
 
-Query3: The distribution of top 100 most traded stocks across all sectors 
+Query5: The distribution of top 100 most traded stocks across all sectors 
 ```SQL
 WITH ac AS(
 	SELECT q.symbol, c.sector
@@ -87,7 +87,7 @@ GROUP BY sector
 ORDER BY freq
 ```
 
-Query4: The average return of the day for overvalued stocks in each sector
+Query6: The average return of the day for overvalued stocks in each sector
 ```SQL
 WITH value AS(
 	SELECT symbol, sector
@@ -99,7 +99,7 @@ FROM value join Quotes q on q.symbol = value.symbol
 GROUP BY sector
 ```
 
-Query5: The list of all the earnings coming up of popular stocks sorted by popularity
+Query7: The list of all the earnings coming up of popular stocks sorted by popularity
 ```SQL
 WITH most_freq AS(
 	SELECT symbol, volume
