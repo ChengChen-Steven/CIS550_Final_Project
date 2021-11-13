@@ -1,0 +1,83 @@
+## create initial table
+cursor = mydb.cursor()
+cursor.execute(
+    """
+    DROP TABLE IF EXISTS Fundamentals; 
+
+    CREATE TABLE Fundamentals(
+        Symbol varchar(8),
+        Name varchar(255)
+        PRIMARY KEY (Symbol));
+    """,
+    multi=True
+)
+
+df = get_sp500_funamentals(["AAPL", "V"])
+print(df)
+
+engine = create_engine("mysql+pymysql://{user}:{pw}@{host}:{port}/{db}".format(
+    user=cfg.db_stock["user"],
+    pw=cfg.db_stock["password"],
+    host=cfg.db_stock["host"],
+    port=cfg.db_stock["port"],
+    db=cfg.db_stock["database"]))
+df = df[["Symbol", "Name"]]
+# print(df)
+
+df.to_sql("Fundamentals", con=engine, if_exists="replace")
+engine.execute("SHOW TABLES").fetchall()
+
+mycursor = mydb.cursor()
+mycursor.execute(
+    """
+    SELECT *
+    FROM Fundamentals;
+    """
+)
+print([i[0] for i in mycursor.description])
+result = mycursor.fetchall()
+for x in result:
+    print(x)
+
+
+
+"""
+    CREATE TABLE Fundamentals(
+        symbol varchar(8),
+        asset_type varchar(20),
+        name varchar(255),
+        exchange varchar(20),
+        currency varchar(20), 
+        country varchar(20), 
+        sector varchar(20),
+        industry varchar(20),
+        MarketCapitalization decimal(16,1),
+        EBITDA decimal(10,2),
+        PERatio decimal(10,2),
+        PEGRatio decimal(10,2),
+        BookValue decimal(16,1),
+        DividendPerShare decimal(10,2),
+        DividendYield decimal(10,2),
+        EPS decimal(10,2),
+        RevenuePerShareTTM decimal(10,2),
+        ProfitMargin decimal(10,2),
+        RevenueTTM decimal(16,1),
+        GrossProfitTTM decimal(16,1),
+        DilutedEPSTTM (16,2),
+        QuarterlyEarningsGrowthYOY (16,3),
+        QuarterlyRevenueGrowthYOY (16,3),
+        AnalystTargetPrice decimal(16,1),
+        TrailingPE decimal(16,1),
+        ForwardPE decimal(16,1),
+        PriceToSalesRatioTTM decimal(16,1),
+        PriceToBookRatio decimal(16,1),
+        EVToRevenue decimal(16,1),
+        EVToEBITDA decimal(16,1),
+        Beta decimal(16,1),
+        52WeekHigh decimal(16,1),
+        52WeekLow decimal(16,1),
+        50DayMovingAverage decimal(16,1),
+        200DayMovingAverage decimal(16,1),
+        SharesOutstanding int
+        PRIMARY KEY (symbol));
+        """
