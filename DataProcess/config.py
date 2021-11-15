@@ -16,6 +16,7 @@ api_keys = [
     "AAIP8XSFIIUIUF7H",
     "CM997GMQFSHJUOMW",
     "B9RQZ1WV8GOYCQBD",
+    "SH8R2WX3C9CD67CV",
 ]
 
 sp500_wiki = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
