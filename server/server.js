@@ -15,7 +15,12 @@ app.use(cors({
 // Route 1 - register as GET 
 app.get('/hello', routes.hello)
 
+
 // Route 2 - register as GET 
+app.get('/price/:symbol', routes.price)
+
+
+// Route 3 - register as GET 
 app.get('/sector/:sector', routes.sector)
 app.get('/sector', routes.all_sectors)
 

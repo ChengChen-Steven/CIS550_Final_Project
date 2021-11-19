@@ -27,21 +27,14 @@ async function hello(req, res) {
     }
 }
 
-// Route 1.1 (handler)
-async function sector(req, res) {
-    const sector = req.params.sector ? req.params.sector : 'all'
-    if (sector != "all") {
+// Route 2 (handler)
+async function price(req, res) {
+    const symbol = req.params.symbol
+    if (symbol) {
         var query = `
-          WITH cte AS (
-              SELECT p.Symbol, p.Change
-              FROM Price AS p
-              WHERE date = (SELECT MAX(Date) FROM Price)
-          )
-          SELECT f.sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS day_change
-          FROM Fundamentals AS f
-          INNER JOIN cte
-          ON cte.symbol = f.symbol
-          AND f.sector = '${sector}';        
+          SELECT p.symbol, p.open, p.high, p.low, p.close
+            FROM Price AS p
+           WHERE symbol = '${symbol}';        
           `
             ;
         connection.query(query, function (error, results, fields) {
@@ -57,20 +50,62 @@ async function sector(req, res) {
     }
 }
 
-// Route 1.1 (handler)
-async function all_sectors(req, res) {
-    var query = `
+
+// Route 3 (handler)
+async function sector(req, res) {
+    const sector = req.params.sector 
+    if (sector) {
+        var query = `
           WITH cte AS (
               SELECT p.Symbol, p.Change
-              FROM Price AS p
-              WHERE date = (SELECT MAX(Date) FROM Price)
-          )   
+                FROM Price AS p
+               WHERE date = (SELECT MAX(Date) FROM Price)
+          )
           SELECT f.sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS day_change
-          FROM Fundamentals AS f
-          INNER JOIN cte
-          ON cte.symbol = f.symbol
-          GROUP BY f.sector
-          ORDER BY day_change DESC;        
+            FROM Fundamentals AS f
+           INNER JOIN cte
+              ON cte.symbol = f.symbol
+             AND f.sector = '${sector}';        
+          `
+            ;
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+    } else {
+        res.json([])
+    }
+}
+
+// Route 4 (handler)
+async function all_sectors(req, res) {
+    var query = `
+      WITH a AS (
+          SELECT symbol, date, p.close, p.change, 
+                 ROW_NUMBER() over (PARTITION BY symbol ORDER BY date desc) as rk
+            FROM Price AS p
+           WHERE DATEDIFF((SELECT MAX(Date) FROM Price), date) <= 20
+      ), b AS (
+          SELECT a1.symbol,
+               a1.change AS 1d_change,
+               (a1.close-a2.close)/a2.close AS 10d_change
+            FROM a AS a1
+           INNER JOIN a AS a2
+              ON a1.symbol = a2.symbol
+             AND a1.rk = 1
+             AND a2.rk = 11
+    )
+    SELECT f.sector,
+           CONCAT(ROUND(100 * AVG(b.1d_change), 3), '%') AS 1d_change,
+           CONCAT(ROUND(100 * AVG(b.10d_change), 3), '%') AS 10d_change
+      FROM Fundamentals AS f
+     INNER join b
+        ON f.symbol = b.symbol
+     GROUP BY f.sector;      
           `
         ;
     connection.query(query, function (error, results, fields) {
@@ -82,8 +117,11 @@ async function all_sectors(req, res) {
         }
     });
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////// HW2  ///////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Route 2 (handler)
 async function jersey(req, res) {
     const colors = ['red', 'blue']
@@ -372,6 +410,7 @@ async function search_players(req, res) {
 
 module.exports = {
     hello,
+    price,
     sector,
     all_sectors,
     //all_industry,
