@@ -21,16 +21,65 @@ connection.connect();
 async function hello(req, res) {
     // a GET request to /hello?name=Steve
     if (req.query.name) {
-        res.send(`Hello, ${req.query.name}! Welcome to the FIFA server!`)
+        res.send(`Hello, ${req.query.name}! Welcome to the Stock Trading App!`)
     } else {
-        res.send(`Hello! Welcome to the FIFA server!`)
+        res.send(`Hello! Welcome to the Stock Trading App!`)
+    }
+}
+
+// Route 1.1 (handler)
+async function sector(req, res) {
+
+    if (req.params.sector) {
+        const sector = req.params.sector
+        var query = `
+        WITH cte AS (
+            SELECT Symbol, Change
+            FROM Price
+            WHERE date = (SELECT MAX(Date) FROM Price)
+        )
+        SELECT sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS change
+        FROM Fundamentals AS f
+        INNER JOIN cte
+        ON cte.symbol = f.symbol
+        AND f.sector = '${sector}'};        
+        `
+        ;
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });        
+    } else {
+        var query = `
+        WITH cte AS (
+            SELECT Symbol, Change
+            FROM Price
+            WHERE date = (SELECT MAX(Date) FROM Price)
+        )
+        SELECT f.sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS change
+        FROM Fundamentals AS f
+        INNER JOIN cte
+        ON cte.symbol = f.symbol
+        GROUP BY f.sector
+        ORDER BY change DESC;        
+        `
+        ;
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
     }
 }
 
 
-// ********************************************
-//                  WARM UP 
-// ********************************************
 
 // Route 2 (handler)
 async function jersey(req, res) {
@@ -50,11 +99,6 @@ async function jersey(req, res) {
         res.json({ message: `Hello, ${name}, we like your jersey!` })
     }
 }
-
-// ********************************************
-//               GENERAL ROUTES
-// ********************************************
-
 
 // Route 3 (handler)
 async function all_matches(req, res) {
@@ -325,6 +369,8 @@ async function search_players(req, res) {
 
 module.exports = {
     hello,
+    sector,
+    all_industry,
     jersey,
     all_matches,
     all_players,
