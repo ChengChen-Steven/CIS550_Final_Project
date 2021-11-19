@@ -29,45 +29,21 @@ async function hello(req, res) {
 
 // Route 1.1 (handler)
 async function sector(req, res) {
-
-    if (req.params.sector) {
-        const sector = req.params.sector
+    const sector = req.params.sector ? req.params.sector : 'all'
+    if (sector != "all") {
         var query = `
-        WITH cte AS (
-            SELECT Symbol, Change
-            FROM Price
-            WHERE date = (SELECT MAX(Date) FROM Price)
-        )
-        SELECT sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS change
-        FROM Fundamentals AS f
-        INNER JOIN cte
-        ON cte.symbol = f.symbol
-        AND f.sector = '${sector}'};        
-        `
-        ;
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });        
-    } else {
-        var query = `
-        WITH cte AS (
-            SELECT Symbol, Change
-            FROM Price
-            WHERE date = (SELECT MAX(Date) FROM Price)
-        )
-        SELECT f.sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS change
-        FROM Fundamentals AS f
-        INNER JOIN cte
-        ON cte.symbol = f.symbol
-        GROUP BY f.sector
-        ORDER BY change DESC;        
-        `
-        ;
+          WITH cte AS (
+              SELECT p.Symbol, p.Change
+              FROM Price AS p
+              WHERE date = (SELECT MAX(Date) FROM Price)
+          )
+          SELECT f.sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS day_change
+          FROM Fundamentals AS f
+          INNER JOIN cte
+          ON cte.symbol = f.symbol
+          AND f.sector = '${sector}';        
+          `
+            ;
         connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
@@ -76,9 +52,36 @@ async function sector(req, res) {
                 res.json({ results: results })
             }
         });
+    } else {
+        res.json([])
     }
 }
 
+// Route 1.1 (handler)
+async function all_sectors(req, res) {
+    var query = `
+          WITH cte AS (
+              SELECT p.Symbol, p.Change
+              FROM Price AS p
+              WHERE date = (SELECT MAX(Date) FROM Price)
+          )   
+          SELECT f.sector, CONCAT(ROUND(100 * AVG(cte.Change), 3), '%') AS day_change
+          FROM Fundamentals AS f
+          INNER JOIN cte
+          ON cte.symbol = f.symbol
+          GROUP BY f.sector
+          ORDER BY day_change DESC;        
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
 
 
 // Route 2 (handler)
@@ -114,7 +117,7 @@ async function all_matches(req, res) {
         // The SQL schema has the attribute OverallRating, but modify it to match spec! 
         // TODO: query and return results here:
         var pagesize = req.query.pagesize ? req.params.pagesize : 10
-        var offset_page_size = pagesize * (req.query.page - 1) 
+        var offset_page_size = pagesize * (req.query.page - 1)
         var query = `
           SELECT MatchId, Date, Time, HomeTeam AS Home, AwayTeam AS Away, FullTimeGoalsH AS HomeGoals, FullTimeGoalsA AS AwayGoals    
           FROM Matches
@@ -123,7 +126,7 @@ async function all_matches(req, res) {
           LIMIT ${pagesize}
           OFFSET ${offset_page_size};
           `
-        ;
+            ;
         connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
@@ -131,8 +134,8 @@ async function all_matches(req, res) {
             } else if (results) {
                 res.json({ results: results })
             }
-        });        
-   
+        });
+
     } else {
         // The SQL schema has the attribute OverallRating, but modify it to match spec! 
         // we have implemented this for you to see how to return results by querying the database
@@ -141,7 +144,7 @@ async function all_matches(req, res) {
           FROM Matches 
           WHERE Division = '${league}'
           ORDER BY HomeTeam, AwayTeam;`
-         ;
+            ;
         connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
@@ -158,36 +161,36 @@ async function all_players(req, res) {
     // TODO: TASK 5: implement and test, potentially writing your own (ungraded) tests
     if (req.query.page && !isNaN(req.query.page)) {
         var pagesize = req.query.pagesize ? req.params.pagesize : 10
-        var offset_page_size = pagesize * (req.query.page - 1) 
+        var offset_page_size = pagesize * (req.query.page - 1)
         var query = `
           SELECT PlayerId, Name, Nationality, OverallRating AS Rating, Potential, Club, Value
           FROM Players
           ORDER BY Name
           LIMIT ${pagesize}
           OFFSET ${offset_page_size};`
-         ;
-         connection.query(query, function (error, results, fields) {
+            ;
+        connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
                 res.json({ error: error })
             } else if (results) {
                 res.json({ results: results })
             }
-        });       
+        });
     } else {
         var query = `
           SELECT PlayerId, Name, Nationality, OverallRating AS Rating, Potential, Club, Value
           FROM Players
           ORDER BY Name;`
-         ;
-         connection.query(query, function (error, results, fields) {
+            ;
+        connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
                 res.json({ error: error })
             } else if (results) {
                 res.json({ results: results })
             }
-        });       
+        });
     }
 }
 
@@ -212,15 +215,15 @@ async function match(req, res) {
                  RedCardsH AS RCHome, RedCardsA AS RCAway
           FROM Matches
           WHERE MatchId = ${req.query.id};`
-       ;
-       connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    }); 
+            ;
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
     } else {
         res.json([])
     }
@@ -243,15 +246,15 @@ async function player(req, res) {
           FROM Players
           WHERE PlayerId = ${req.query.id} 
           AND BestPosition = 'GK';`
-        ;
+            ;
         connection.query(query, function (error, results, fields) {
-          if (error) {
-               console.log(error)
-               res.json({ error: error })
-           } else if (results.length == 1) {
-               res.json({ results: results })
-           } else if (results.length == 0) {
-            var query2 = `
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results.length == 1) {
+                res.json({ results: results })
+            } else if (results.length == 0) {
+                var query2 = `
             SELECT PlayerId, Name, Age, Photo, Nationality, Flag, 
                    OverallRating AS Rating, Potential, Club, ClubLogo, Value,
                    Wage, InternationalReputation, Skill, JerseyNumber, ContractValidUntil, 
@@ -260,17 +263,17 @@ async function player(req, res) {
             FROM Players
             WHERE PlayerId = ${req.query.id} 
             AND BestPosition <> 'GK';`
-          ;
-          connection.query(query2, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }    
-           });
-        }
-       }); 
+                    ;
+                connection.query(query2, function (error, results, fields) {
+                    if (error) {
+                        console.log(error)
+                        res.json({ error: error })
+                    } else if (results) {
+                        res.json({ results: results })
+                    }
+                });
+            }
+        });
     } else {
         res.json([])
     }
@@ -310,7 +313,7 @@ async function search_matches(req, res) {
             } else if (results) {
                 res.json({ results: results })
             }
-        });   
+        });
     } else {
         var query = query1 + where_clause + query2
         connection.query(query, function (error, results, fields) {
@@ -320,10 +323,10 @@ async function search_matches(req, res) {
             } else if (results) {
                 res.json({ results: results })
             }
-        });   
+        });
     }
 }
- 
+
 // Route 8 (handler)
 async function search_players(req, res) {
     // TODO: TASK 9: implement and test, potentially writing your own (ungraded) tests
@@ -334,7 +337,7 @@ async function search_players(req, res) {
     var cond3 = req.query.Club ? " AND Club = '" + req.query.Club + "'" : ""
     var cond4 = req.query.RatingLow ? " OverallRating >= " + req.query.RatingLow : " OverallRating >= 0 "
     var cond5 = req.query.RatingHigh ? " AND OverallRating <= " + req.query.RatingHigh : " AND OverallRating <= 100 "
-    var cond6 = req.query.PotentialLow ? " AND Potential >= " + req.query.PotentialLow : " AND Potential >= 0 " 
+    var cond6 = req.query.PotentialLow ? " AND Potential >= " + req.query.PotentialLow : " AND Potential >= 0 "
     var cond7 = req.query.PotentialHigh ? " AND Potential <= " + req.query.PotentialHigh : " AND Potential <= 100 "
     var query2 = " ORDER BY Name "
 
@@ -343,7 +346,7 @@ async function search_players(req, res) {
         var offset_page_size = pagesize * (req.query.page - 1)
         var query3 = " LIMIT " + pagesize + " OFFSET " + offset_page_size
         var query = query1 + cond4 + cond5 + cond6 + cond7 + cond1 + cond2 + cond3 + query2 + query3
-        res.json({results: query})
+        res.json({ results: query })
         connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
@@ -351,7 +354,7 @@ async function search_players(req, res) {
             } else if (results) {
                 res.json({ results: results })
             }
-        });   
+        });
     } else {
         var query = query1 + cond4 + cond5 + cond6 + cond7 + cond1 + cond2 + cond3 + query2
         //res.json({results: query})
@@ -362,7 +365,7 @@ async function search_players(req, res) {
             } else if (results) {
                 res.json({ results: results })
             }
-        });   
+        });
     }
 
 }
@@ -370,12 +373,13 @@ async function search_players(req, res) {
 module.exports = {
     hello,
     sector,
-    all_industry,
-    jersey,
-    all_matches,
-    all_players,
-    match,
-    player,
-    search_matches,
-    search_players
+    all_sectors,
+    //all_industry,
+    //jersey,
+    //all_matches,
+    //all_players,
+    //match,
+    //player,
+    //search_matches,
+    //search_players
 }
