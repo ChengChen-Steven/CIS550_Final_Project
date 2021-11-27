@@ -23,11 +23,7 @@ app.get('/price/:symbol', routes.price)
 // Route 3 - register as GET 
 app.get('/sector/:sector', routes.sector)
 app.get('/sector', routes.all_sectors)
-app.get('/stock/:symbol',routes.stock)
-app.get('/stocks',routes.all_stocks)
-app.get('/prices/:symbol',routes.all_price)
-app.get('/search/stocks', routes.search_stocks)
-app.get('/search/prices', routes.search_prices)
+
 
 // Route 2 - register as GET 
 //app.get('/industry/:choice', routes.jersey)
