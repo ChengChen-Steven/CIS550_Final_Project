@@ -117,6 +117,422 @@ async function all_sectors(req, res) {
         }
     });
 }
+
+
+// Route a1 for SectorPage
+async function top_upchange(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Close, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date) 
+            FROM Price   
+        )
+    )
+    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.symbol
+    ORDER BY target.change DESC
+    LIMIT 5;
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route b2 for SectorPage
+async function top_downchange(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Close, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date) 
+            FROM Price   
+        )
+    )
+    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.symbol
+    ORDER BY target.change ASC
+    LIMIT 5;
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route c3 for SectorPage
+async function top_amplitude(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Close, p.High, p.Low
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date) 
+            FROM Price   
+        )
+    )
+    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND((target.High-target.Low)*100/target.Close, 2),'%') AS '%Amplitude'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.symbol
+    ORDER BY ROUND((target.High-target.Low)*100/target.Close, 2) DESC
+    LIMIT 5;
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route d4 for SectorPage
+async function top_turnover(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Close, p.Volume
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date) 
+            FROM Price   
+        )
+    )
+    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Volume*100/fund.floatshares, 2),'%') AS '%Turnover'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.symbol
+    ORDER BY ROUND(target.Volume*100/fund.floatshares, 2) DESC
+    LIMIT 5;
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route e5 for SectorPage
+async function top_sector(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date) 
+            FROM Price   
+        )
+    )
+    SELECT fund.sector, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%SectorChange'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.Symbol
+    GROUP BY fund.sector
+    ORDER BY ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2) DESC
+    LIMIT 5;
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route f6 for SectorPage
+async function condition_sector(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS (
+        SELECT fund.sector, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%SectorChange',
+           IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)>0,1, 0 ) AS positive,
+           IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)<0,1, 0 ) AS negative
+        FROM Fundamentals AS fund
+        INNER JOIN target
+        ON fund.symbol = target.Symbol
+        GROUP BY fund.sector
+        )
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    FROM compute
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route g7 for SectorPage
+async function top_industry(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date) 
+            FROM Price   
+        )
+    )
+    SELECT fund.industry, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%IndustryChange'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.Symbol
+    GROUP BY fund.industry
+    ORDER BY ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2) DESC
+    LIMIT 5;
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route h8 for SectorPage
+async function condition_industry(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS (
+        SELECT fund.industry, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%IndustryChange',
+           IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)>0,1, 0 ) AS positive,
+           IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)<0,1, 0 ) AS negative
+        FROM Fundamentals AS fund
+        INNER JOIN target
+        ON fund.symbol = target.Symbol
+        GROUP BY fund.industry
+        )
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    FROM compute
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route i9 for SectorPage
+async function first_sector(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    )
+    SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.Symbol
+    WHERE fund.sector = (
+        SELECT fund.sector
+        FROM Fundamentals AS fund
+        INNER JOIN target
+        ON fund.symbol = target.Symbol
+        GROUP BY fund.sector
+        ORDER BY ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2) DESC
+        LIMIT 1
+    )
+    ORDER BY target.Change DESC
+    LIMIT 5
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route j10 for SectorPage
+async function condition_firstsector(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS (
+        SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change',
+           IF(ROUND(target.Change*100, 2)>0,1, 0 ) AS positive,
+           IF(ROUND(target.Change*100, 2)<0,1, 0 ) AS negative
+        FROM Fundamentals AS fund
+        INNER JOIN target
+        ON fund.symbol = target.Symbol
+        WHERE fund.sector = (
+            SELECT fund.sector
+            FROM Fundamentals AS fund
+            INNER JOIN target
+            ON fund.symbol = target.Symbol
+            GROUP BY fund.sector
+            ORDER BY ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2) DESC
+            LIMIT 1
+        )
+    )            
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    FROM compute
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route k11 for SectorPage
+async function first_industry(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    )
+    SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    FROM Fundamentals AS fund
+    INNER JOIN target
+    ON fund.symbol = target.Symbol
+    WHERE fund.industry = (
+        SELECT fund.industry
+        FROM Fundamentals AS fund
+        INNER JOIN target
+        ON fund.symbol = target.Symbol
+        GROUP BY fund.industry
+        ORDER BY ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2) DESC
+        LIMIT 1
+    )
+    ORDER BY target.Change DESC
+    LIMIT 5
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+// Route l12 for SectorPage
+async function condition_firstindustry(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS (
+        SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change',
+           IF(ROUND(target.Change*100, 2)>0,1, 0 ) AS positive,
+           IF(ROUND(target.Change*100, 2)<0,1, 0 ) AS negative
+        FROM Fundamentals AS fund
+        INNER JOIN target
+        ON fund.symbol = target.Symbol
+        WHERE fund.industry = (
+            SELECT fund.industry
+            FROM Fundamentals AS fund
+            INNER JOIN target
+            ON fund.symbol = target.Symbol
+            GROUP BY fund.industry
+            ORDER BY ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2) DESC
+            LIMIT 1
+        )
+    )            
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    FROM compute
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////// HW2  ///////////////////////////////////////////////////////////////
@@ -413,12 +829,19 @@ module.exports = {
     price,
     sector,
     all_sectors,
-    //all_industry,
-    //jersey,
-    //all_matches,
-    //all_players,
-    //match,
-    //player,
-    //search_matches,
-    //search_players
+
+    top_upchange,
+    top_downchange,
+    top_amplitude,
+    top_turnover,
+    top_sector,
+    condition_sector,
+    top_industry,
+    condition_industry,
+    first_sector,
+    condition_firstsector,
+    first_industry,
+    condition_firstindustry
+
+
 }
