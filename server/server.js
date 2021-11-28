@@ -18,6 +18,7 @@ app.get('/hello', routes.hello)
 
 // Route 2 - register as GET 
 app.get('/price/:symbol', routes.price)
+app.get('/indexPrice/:symbol', routes.indexPrice)
 
 
 // Route 3 - register as GET 

@@ -1,6 +1,7 @@
 const config = require('./config.json')
 const mysql = require('mysql');
 const e = require('express');
+const yahooStockPrices = require('yahoo-stock-prices');
 
 // TODO: fill in your connection details here
 const connection = mysql.createConnection({
@@ -45,6 +46,20 @@ async function price(req, res) {
                 res.json({ results: results })
             }
         });
+    } else {
+        res.json([])
+    }
+}
+
+// Route 2.1 (S&P 500)
+// Route 2 (handler)
+async function indexPrice(req, res) {
+    // symbol = ^IXIC, ^DJI, ^GSPC
+    const symbol = req.params.symbol
+    if (symbol) {
+        const price = await yahooStockPrices.getCurrentPrice(symbol);
+        console.log(price);
+        res.json({results: price})
     } else {
         res.json([])
     }
@@ -827,6 +842,7 @@ async function search_players(req, res) {
 module.exports = {
     hello,
     price,
+    indexPrice,
     sector,
     all_sectors,
 

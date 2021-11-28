@@ -8,6 +8,13 @@ const getPrice = async (symbol) => {
     return res.json()
 }
 
+const getIndexPrice = async (symbol) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/indexPrice/${symbol}`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
+
 const getSector = async (sector) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/sector/${sector}`, {
         method: 'GET',
@@ -74,6 +81,7 @@ const getPlayerSearch = async (name, nationality, club, rating_high, rating_low,
 
 export {
     getPrice,
+    getIndexPrice,
     getSector,
     getAllSectors
 }
