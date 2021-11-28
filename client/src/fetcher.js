@@ -1,5 +1,28 @@
 import config from './config.json'
 
+
+const getPrice = async (symbol) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/price/${symbol}`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
+
+const getSector = async (sector) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sector/${sector}`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
+
+const getAllSectors = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sector`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
+
+/*
 const getAllMatches = async (page, pagesize, league) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/matches/${league}?page=${page}&pagesize=${pagesize}`, {
         method: 'GET',
@@ -42,12 +65,7 @@ const getPlayerSearch = async (name, nationality, club, rating_high, rating_low,
     return res.json()
 }
 
-
-
-
-
-
-
+*/
 
 
 
@@ -55,10 +73,7 @@ const getPlayerSearch = async (name, nationality, club, rating_high, rating_low,
 
 
 export {
-    getAllMatches,
-    getAllPlayers,
-    getMatch,
-    getPlayer,
-    getMatchSearch,
-    getPlayerSearch
+    getPrice,
+    getSector,
+    getAllSectors
 }

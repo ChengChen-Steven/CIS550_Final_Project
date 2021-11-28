@@ -32,7 +32,7 @@ async function price(req, res) {
     const symbol = req.params.symbol
     if (symbol) {
         var query = `
-          SELECT p.symbol, p.open, p.high, p.low, p.close
+          SELECT date_format(p.date, "%Y-%m-%d") as date, p.open, p.high, p.low, p.close, p.volume
             FROM Price AS p
            WHERE symbol = '${symbol}';        
           `
@@ -91,8 +91,8 @@ async function all_sectors(req, res) {
            WHERE DATEDIFF((SELECT MAX(Date) FROM Price), date) <= 20
       ), b AS (
           SELECT a1.symbol,
-               a1.change AS 1d_change,
-               (a1.close-a2.close)/a2.close AS 10d_change
+               a1.change AS d1_change,
+               (a1.close-a2.close)/a2.close AS d10_change
             FROM a AS a1
            INNER JOIN a AS a2
               ON a1.symbol = a2.symbol
@@ -100,8 +100,8 @@ async function all_sectors(req, res) {
              AND a2.rk = 11
     )
     SELECT f.sector,
-           CONCAT(ROUND(100 * AVG(b.1d_change), 3), '%') AS 1d_change,
-           CONCAT(ROUND(100 * AVG(b.10d_change), 3), '%') AS 10d_change
+           CONCAT(ROUND(100 * AVG(b.d1_change), 3), '%') AS d1_change,
+           CONCAT(ROUND(100 * AVG(b.d10_change), 3), '%') AS d10_change
       FROM Fundamentals AS f
      INNER join b
         ON f.symbol = b.symbol
