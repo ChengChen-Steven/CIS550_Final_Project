@@ -25,6 +25,20 @@ app.get('/sector/:sector', routes.sector)
 app.get('/sector', routes.all_sectors)
 
 
+//Route 5 for SectorPage
+app.get('/sectorpage/upchange', routes.top_upchange)
+app.get('/sectorpage/downchange', routes.top_downchange)
+app.get('/sectorpage/amplitude,', routes.top_amplitude)
+app.get('/sectorpage/turnover', routes.top_turnover)
+app.get('/sectorpage/sector', routes.top_sector)
+app.get('/sectorpage/conitionsector', routes.condition_sector)
+app.get('/sectorpage/industry', routes.top_industry)
+app.get('/sectorpage/conditionindustry', routes.condition_industry)
+app.get('/sectorpage/firstsector', routes.first_sector)
+app.get('/sectorpage/conditionfirstsector', routes.condition_firstsector)
+app.get('/sectorpage/firstindustry', routes.first_industry)
+app.get('/sectorpage/conditionfirstindustry', routes.condition_firstindustry)
+
 // Route 2 - register as GET 
 //app.get('/industry/:choice', routes.jersey)
 
