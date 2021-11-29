@@ -550,227 +550,26 @@ async function condition_firstindustry(req, res) {
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////// HW2  ///////////////////////////////////////////////////////////////
+/////////////////////////////////////// Stock Page Update ///////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Route 2 (handler)
-async function jersey(req, res) {
-    const colors = ['red', 'blue']
-    const jersey_number = Math.floor(Math.random() * 20) + 1
-    const name = req.query.name ? req.query.name : "player"
-
-    if (req.params.choice === 'number') {
-        // TODO: TASK 1: inspect for issues and correct 
-        res.json({ message: `Hello, ${name}!`, jersey_number: jersey_number })
-    } else if (req.params.choice === 'color') {
-        var lucky_color_index = Math.floor(Math.random() * 2);
-        // TODO: TASK 2: change this or any variables above to return only 'red' or 'blue' at random (go Quakers!)
-        res.json({ message: `Hello, ${name}!`, jersey_color: colors[lucky_color_index] })
+//route 1 search price for StockPage
+async function search_prices(req, res) {
+    const symbol = req.params.symbol
+    // search for price history within the dates specified by user
+    var query1 = "SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Close, p.Volume FROM Price p"
+    var query2 = " ORDER BY Date"
+    if (req.query.StartDate && req.query.EndDate) {
+        var where_clause = "WHERE Date > '" + req.query.StartDate + " AND " + " Date <'" + req.query.EndDate + " AND Symbol ="+ symbol
+    } else if (req.query.StartDate) {
+        var where_clause = "WHERE Date > '" + req.query.StartDate+ " AND Symbol ="+ symbol
+    } else if (req.query.EndDate) {
+        var where_clause = "WHERE Date < '" + req.query.EndDate+ " AND Symbol ="+ symbol
     } else {
-        // TODO: TASK 3: inspect for issues and correct
-        res.json({ message: `Hello, ${name}, we like your jersey!` })
-    }
-}
-
-// Route 3 (handler)
-async function all_matches(req, res) {
-    // TODO: TASK 4: implement and test, potentially writing your own (ungraded) tests
-    // We have partially implemented this function for you to 
-    // parse in the league encoding - this is how you would use the ternary operator to set a variable to a default value
-    // we didn't specify this default value for league, and you could change it if you want! 
-    const league = req.params.league ? req.params.league : 'D1'
-    // use this league encoding in your query to furnish the correct results
-
-    if (req.query.page && !isNaN(req.query.page)) {
-        // This is the case where page is defined.
-        // The SQL schema has the attribute OverallRating, but modify it to match spec! 
-        // TODO: query and return results here:
-        var pagesize = req.query.pagesize ? req.params.pagesize : 10
-        var offset_page_size = pagesize * (req.query.page - 1)
-        var query = `
-          SELECT MatchId, Date, Time, HomeTeam AS Home, AwayTeam AS Away, FullTimeGoalsH AS HomeGoals, FullTimeGoalsA AS AwayGoals    
-          FROM Matches
-          WHERE Division = '${league}'
-          ORDER BY Home, Away
-          LIMIT ${pagesize}
-          OFFSET ${offset_page_size};
-          `
-            ;
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
-
-    } else {
-        // The SQL schema has the attribute OverallRating, but modify it to match spec! 
-        // we have implemented this for you to see how to return results by querying the database
-        var query = `
-          SELECT MatchId, Date, Time, HomeTeam AS Home, AwayTeam AS Away, FullTimeGoalsH AS HomeGoals, FullTimeGoalsA AS AwayGoals  
-          FROM Matches 
-          WHERE Division = '${league}'
-          ORDER BY HomeTeam, AwayTeam;`
-            ;
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
-    }
-}
-
-// Route 4 (handler)
-async function all_players(req, res) {
-    // TODO: TASK 5: implement and test, potentially writing your own (ungraded) tests
-    if (req.query.page && !isNaN(req.query.page)) {
-        var pagesize = req.query.pagesize ? req.params.pagesize : 10
-        var offset_page_size = pagesize * (req.query.page - 1)
-        var query = `
-          SELECT PlayerId, Name, Nationality, OverallRating AS Rating, Potential, Club, Value
-          FROM Players
-          ORDER BY Name
-          LIMIT ${pagesize}
-          OFFSET ${offset_page_size};`
-            ;
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
-    } else {
-        var query = `
-          SELECT PlayerId, Name, Nationality, OverallRating AS Rating, Potential, Club, Value
-          FROM Players
-          ORDER BY Name;`
-            ;
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
-    }
-}
-
-
-// ********************************************
-//             MATCH-SPECIFIC ROUTES
-// ********************************************
-
-// Route 5 (handler)
-async function match(req, res) {
-    // TODO: TASK 6: implement and test, potentially writing your own (ungraded) tests
-    if (req.query.id && !isNaN(req.query.id)) {
-        var query = `
-          SELECT MatchId, Date, Time, HomeTeam AS Home, AwayTeam AS Away, 
-                 FullTimeGoalsH AS HomeGoals, FullTimeGoalsA AS AwayGoals , 
-                 HalfTimeGoalsH AS HTHomeGoals, HalfTimeGoalsA AS HTAwayGoals, 
-                 ShotsH AS ShotsHome, ShotsA AS ShotsAway, 
-                 ShotsOnTargetH AS ShotsOnTargetHome, ShotsOnTargetA AS ShotsOnTargetAway, 
-                 FoulsH AS FoulsHome, FoulsA AS FoulsAway, 
-                 CornersH AS CornersHome, CornersA AS CornersAway,
-                 YellowCardsH AS YCHome, YellowCardsA AS YCAway, 
-                 RedCardsH AS RCHome, RedCardsA AS RCAway
-          FROM Matches
-          WHERE MatchId = ${req.query.id};`
-            ;
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
-    } else {
-        res.json([])
-    }
-}
-
-// ********************************************
-//            PLAYER-SPECIFIC ROUTES
-// ********************************************
-
-// Route 6 (handler)
-async function player(req, res) {
-    // TODO: TASK 7: implement and test, potentially writing your own (ungraded) tests
-    if (req.query.id && !isNaN(req.query.id)) {
-        var query = `
-          SELECT PlayerId, Name, Age, Photo, Nationality, Flag, 
-                 OverallRating AS Rating, Potential, Club, ClubLogo, Value,
-                 Wage, InternationalReputation, Skill, JerseyNumber, ContractValidUntil, 
-                 Height, Weight, BestPosition, BestOverallRating, ReleaseClause,
-                 GKPenalties, GKDiving, GKHandling, GKKicking, GKPositioning, GKReflexes 
-          FROM Players
-          WHERE PlayerId = ${req.query.id} 
-          AND BestPosition = 'GK';`
-            ;
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results.length == 1) {
-                res.json({ results: results })
-            } else if (results.length == 0) {
-                var query2 = `
-            SELECT PlayerId, Name, Age, Photo, Nationality, Flag, 
-                   OverallRating AS Rating, Potential, Club, ClubLogo, Value,
-                   Wage, InternationalReputation, Skill, JerseyNumber, ContractValidUntil, 
-                   Height, Weight, BestPosition, BestOverallRating, ReleaseClause,
-                   NPassing, NBallControl, NAdjustedAgility, NStamina, NStrength, NPositioning 
-            FROM Players
-            WHERE PlayerId = ${req.query.id} 
-            AND BestPosition <> 'GK';`
-                    ;
-                connection.query(query2, function (error, results, fields) {
-                    if (error) {
-                        console.log(error)
-                        res.json({ error: error })
-                    } else if (results) {
-                        res.json({ results: results })
-                    }
-                });
-            }
-        });
-    } else {
-        res.json([])
-    }
-
-}
-
-
-// ********************************************
-//             SEARCH ROUTES
-// ********************************************
-
-// Route 7 (handler)
-async function search_matches(req, res) {
-    // TODO: TASK 8: implement and test, potentially writing your own (ungraded) tests
-    // IMPORTANT: in your SQL LIKE matching, use the %query% format to match the search query to substrings, not just the entire string    
-    var query1 = "SELECT MatchId, Date, Time, HomeTeam AS Home, AwayTeam AS Away, FullTimeGoalsH AS HomeGoals, FullTimeGoalsA AS AwayGoals FROM Matches "
-    var query2 = " ORDER BY Home, Away"
-    if (req.query.Home && req.query.Away) {
-        var where_clause = "WHERE HomeTeam LIKE '" + req.query.Home + "%' AND " + " AwayTeam LIKE '" + req.query.Away + "%'"
-    } else if (req.query.Home) {
-        var where_clause = "WHERE HomeTeam LIKE '" + req.query.Home + "%'"
-    } else if (req.query.Away) {
-        var where_clause = "WHERE AwayTeam LIKE '" + req.query.Away + "%'"
-    } else {
-        var where_clause = ""
+        var where_clause = "WHERE Symbol ="+ symbol
     }
     if (req.query.page && !isNaN(req.query.page)) {
-        var pagesize = req.query.pagesize ? req.params.pagesize : 10
+        var pagesize = req.query.pagesize ? req.query.pagesize : 10
         var offset_page_size = pagesize * (req.query.page - 1)
         var query3 = " LIMIT " + pagesize + " OFFSET " + offset_page_size
         var query = query1 + where_clause + query2 + query3
@@ -796,47 +595,282 @@ async function search_matches(req, res) {
     }
 }
 
-// Route 8 (handler)
-async function search_players(req, res) {
-    // TODO: TASK 9: implement and test, potentially writing your own (ungraded) tests
-    // IMPORTANT: in your SQL LIKE matching, use the %query% format to match the search query to substrings, not just the entire string
-    var query1 = "SELECT PlayerId, Name, Nationality, OverallRating AS Rating, Potential, Club, Value From Players WHERE "
-    var cond1 = req.query.Name ? " AND Name LIKE '" + req.query.Name + "%'" : ""
-    var cond2 = req.query.Nationality ? " AND Nationality = '" + req.query.Nationality + "'" : ""
-    var cond3 = req.query.Club ? " AND Club = '" + req.query.Club + "'" : ""
-    var cond4 = req.query.RatingLow ? " OverallRating >= " + req.query.RatingLow : " OverallRating >= 0 "
-    var cond5 = req.query.RatingHigh ? " AND OverallRating <= " + req.query.RatingHigh : " AND OverallRating <= 100 "
-    var cond6 = req.query.PotentialLow ? " AND Potential >= " + req.query.PotentialLow : " AND Potential >= 0 "
-    var cond7 = req.query.PotentialHigh ? " AND Potential <= " + req.query.PotentialHigh : " AND Potential <= 100 "
-    var query2 = " ORDER BY Name "
 
-    if (req.query.page && !isNaN(req.query.page)) {
-        var pagesize = req.query.pagesize ? req.params.pagesize : 10
-        var offset_page_size = pagesize * (req.query.page - 1)
-        var query3 = " LIMIT " + pagesize + " OFFSET " + offset_page_size
-        var query = query1 + cond4 + cond5 + cond6 + cond7 + cond1 + cond2 + cond3 + query2 + query3
-        res.json({ results: query })
+//route 2 stock specs for StockPage
+async function stock(req, res) {
+    // display details of specified stock
+    if (req.query.symbol && !isNaN(req.query.symbol)) {
+        var query = `
+          SELECT symbol,shortName,exchange,sector,industry,fullTimeEmployees,longBusinessSummary, country
+          FROM Fundamentals
+          WHERE symbol = ${req.query.symbol};`
+            ;
         connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
                 res.json({ error: error })
-            } else if (results) {
+            } else {
                 res.json({ results: results })
             }
         });
     } else {
-        var query = query1 + cond4 + cond5 + cond6 + cond7 + cond1 + cond2 + cond3 + query2
-        //res.json({results: query})
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
+        res.json([])
     }
 
+}
+
+//route 3 stock performance for StockPage
+async function stock_outperformance_sector(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, f.Sector, p.Change
+        FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS(
+        SELECT f.Sector, AVG(p.Change) AS sectorChange
+        FROM Price p JOIN Fundamentals f ON f.Symbol = p.Symbol
+        WHERE p.Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+        group by f.Sector
+    )
+    SELECT t.Change - cp.sectorChange
+    FROM target t JOIN compute cp ON t.Sector = cp.Sector
+    WHERE t.Symbol = '${symbol}';
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+//route 4 stock performance vs SP500 for StockPage
+async function stock_outperformance_all(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS(
+        SELECT AVG(p.Change) AS avgChange
+        FROM Price p
+        WHERE p.Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    )
+    SELECT t.Change - cp.avgChange
+    FROM target t JOIN compute cp
+    WHERE t.Symbol = '${symbol}';
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+//route 5 stock rank in sector for StockPage
+async function stock_rank_sector(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, f.Sector, p.Change
+        FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS(
+        SELECT t.Symbol, t.Sector, t.Change
+        FROM target t JOIN Fundamentals f ON f.Sector = t.Sector
+        WHERE f.Symbol = '${symbol}'
+    )
+    SELECT COUNT(*)
+    FROM compute cp
+    WHERE cp.Change > (SELECT t.Change FROM target t WHERE t.Symbol = '${symbol}');
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+//route 6 stock rank in SP500 for StockPage
+async function stock_rank_all(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Change
+        FROM Price p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    )
+    SELECT COUNT(*)
+    FROM target t
+    WHERE t.Change > (SELECT t.Change FROM target t WHERE t.Symbol = '${symbol}');
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+//route 7 stock momentum vs sector for StockPage
+async function stock_momentum_sector(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, f.Sector, p.Volume
+        FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS(
+        SELECT f.Sector, AVG(p.Volume) AS sectorVolume
+        FROM Price p JOIN Fundamentals f ON f.Symbol = p.Symbol
+        WHERE p.Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+        group by f.Sector
+    )
+    SELECT t.Volume - cp.sectorVolume
+    FROM target t JOIN compute cp ON t.Sector = cp.Sector
+    WHERE t.Symbol = '${symbol}';
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+
+//route 8 stock performance vs SP500 for StockPage
+async function stock_momentum_all(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Volume
+        FROM Price p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS(
+        SELECT AVG(p.Volume) AS avgVolume
+        FROM Price p
+        WHERE p.Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    )
+    SELECT t.Volume - cp.avgVolume
+    FROM target t JOIN compute cp
+    WHERE t.Symbol = '${symbol}';
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+//route 9 stock rank in sector for StockPage
+async function stock_rankm_sector(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, f.Sector, p.Volume
+        FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    ),
+    compute AS(
+        SELECT t.Symbol, t.Sector, t.Volume
+        FROM target t JOIN Fundamentals f ON f.Sector = t.Sector
+        WHERE f.Symbol = '${symbol}'
+    )
+    SELECT COUNT(*)
+    FROM compute cp
+    WHERE cp.Volume > (SELECT t.Volume FROM target t WHERE t.Symbol = '${symbol}');
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+//route 10 stock rank in SP500 for StockPage
+async function stock_rankm_all(req,res){
+    const symbol = req.params.symbol
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol, p.Volume
+        FROM Price p
+        WHERE Date = (
+            SELECT MAX(Date)
+            FROM Price
+        )
+    )
+    SELECT COUNT(*)
+    FROM target t
+    WHERE t.Volume > (SELECT t.Volume FROM target t WHERE t.Symbol = '${symbol}');
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
 }
 
 module.exports = {
@@ -857,7 +891,16 @@ module.exports = {
     first_sector,
     condition_firstsector,
     first_industry,
-    condition_firstindustry
+    condition_firstindustry,
 
-
+    search_prices,
+    stock,
+    stock_outperformance_sector,
+    stock_outperformance_all,
+    stock_rank_sector,
+    stock_rank_all,
+    stock_momentum_sector,
+    stock_momentum_all,
+    stock_rankm_sector,
+    stock_rankm_all
 }
