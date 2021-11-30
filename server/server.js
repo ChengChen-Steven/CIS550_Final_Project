@@ -40,6 +40,17 @@ app.get('/sectorpage/conditionfirstsector', routes.condition_firstsector)
 app.get('/sectorpage/firstindustry', routes.first_industry)
 app.get('/sectorpage/conditionfirstindustry', routes.condition_firstindustry)
 
+
+app.get('/stockpage/stock',routes.stock)
+app.get('/stockpage/stockvssector/:symbol',routes.stock_outperformance_sector)
+app.get('/stockpage/stockvsall/:symbol',routes.stock_outperformance_all)
+app.get('/stockpage/stockranksector/:symbol', routes.stock_rank_sector)
+app.get('/stockpage/stockrankall/:symbol', routes.stock_rank_all)
+app.get('/search/prices/:symbol', routes.search_prices)
+app.get('/stockpage/stockmvssector/:symbol',routes.stock_momentum_sector)
+app.get('/stockpage/stockmvsall/:symbol',routes.stock_momentum_all)
+app.get('/stockpage/stockrankmsector/:symbol', routes.stock_rankm_sector)
+app.get('/stockpage/stockrankmall/:symbol', routes.stock_rankm_all)
 // Route 2 - register as GET 
 //app.get('/industry/:choice', routes.jersey)
 
