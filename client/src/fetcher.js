@@ -29,6 +29,77 @@ const getAllSectors = async () => {
     return res.json()
 }
 
+
+const getPriceSearch = async (symbol,StartDate,EndDate,page,pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/prices/${symbol}?StartDate=${StartDate}&EndDate=${EndDate}&page=${page}&pagesize=${pagesize}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getStock = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stock/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getVsSector = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockvssector/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getVsAll = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockvsall/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getRankSector = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockranksector/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getRankAll = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockrankall/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getMVsSector = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockmvssector/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getMVsAll = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockmvsall/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getMRankSector = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockrankmsector/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getMRankAll = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockrankmall/${symbol}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
 /*
 const getAllMatches = async (page, pagesize, league) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/matches/${league}?page=${page}&pagesize=${pagesize}`, {
