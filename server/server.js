@@ -41,7 +41,7 @@ app.get('/sectorpage/firstindustry', routes.first_industry)
 app.get('/sectorpage/conditionfirstindustry', routes.condition_firstindustry)
 
 
-app.get('/stockpage/stock',routes.stock)
+app.get('/stock/:symbol',routes.stock)
 app.get('/stockpage/stockvssector/:symbol',routes.stock_outperformance_sector)
 app.get('/stockpage/stockvsall/:symbol',routes.stock_outperformance_all)
 app.get('/stockpage/stockranksector/:symbol', routes.stock_rank_sector)
