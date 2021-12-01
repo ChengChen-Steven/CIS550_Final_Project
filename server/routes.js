@@ -557,24 +557,41 @@ async function condition_firstindustry(req, res) {
 async function search_prices(req, res) {
     const symbol = req.params.symbol
     // search for price history within the dates specified by user
-    var query1 = "SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Close, p.Volume FROM Price p"
-    var query2 = " ORDER BY Date"
+    var query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Symbol = '${symbol}'
+                 ORDER BY p.Date DESC`
     if (req.query.StartDate && req.query.EndDate) {
-        var where_clause = "WHERE Date > '" + req.query.StartDate + " AND " + " Date <'" + req.query.EndDate + " AND Symbol ="+ symbol
+        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Date > '${req.query.StartDate}' AND Date < '${req.query.StartDate}' AND Symbol = '${symbol}'
+                 ORDER BY p.Date DESC`
     } else if (req.query.StartDate) {
-        var where_clause = "WHERE Date > '" + req.query.StartDate+ " AND Symbol ="+ symbol
+        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Date > '${req.query.StartDate}' AND Symbol = '${symbol}'
+                 ORDER BY p.Date DESC`
     } else if (req.query.EndDate) {
-        var where_clause = "WHERE Date < '" + req.query.EndDate+ " AND Symbol ="+ symbol
+        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Date < '${req.query.StartDate}' AND Symbol = '${symbol}'
+                 ORDER BY p.Date DESC`
     } else {
-        var where_clause = "WHERE Symbol ="+ symbol
+        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Symbol = '${symbol}'
+                 ORDER BY p.Date DESC`
     }
     if (req.query.page && !isNaN(req.query.page)) {
         var pagesize = req.query.pagesize ? req.query.pagesize : 10
         var offset_page_size = pagesize * (req.query.page - 1)
-        var query3 = " LIMIT " + pagesize + " OFFSET " + offset_page_size
-        var query = query1 + where_clause + query2 + query3
+        var query1 = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Symbol = '${symbol}'
+                 ORDER BY p.Date DESC
+                 LIMIT '${pagesize}' OFFSET '${offset_page_size}'`
         //res.json({results: query})
-        connection.query(query, function (error, results, fields) {
+        connection.query(query1, function (error, results, fields) {
             if (error) {
                 console.log(error)
                 res.json({ error: error })
@@ -583,7 +600,6 @@ async function search_prices(req, res) {
             }
         });
     } else {
-        var query = query1 + where_clause + query2
         connection.query(query, function (error, results, fields) {
             if (error) {
                 console.log(error)
@@ -599,11 +615,11 @@ async function search_prices(req, res) {
 //route 2 stock specs for StockPage
 async function stock(req, res) {
     // display details of specified stock
-    if (req.query.symbol && !isNaN(req.query.symbol)) {
-        var query = `
+    const symbol = req.params.symbol
+    var query = `
           SELECT symbol,shortName,exchange,sector,industry,fullTimeEmployees,longBusinessSummary, country
           FROM Fundamentals
-          WHERE symbol = ${req.query.symbol};`
+          WHERE symbol = '${symbol}';`
             ;
         connection.query(query, function (error, results, fields) {
             if (error) {
@@ -613,9 +629,7 @@ async function stock(req, res) {
                 res.json({ results: results })
             }
         });
-    } else {
-        res.json([])
-    }
+
 
 }
 
@@ -640,7 +654,7 @@ async function stock_outperformance_sector(req,res){
         )
         group by f.Sector
     )
-    SELECT t.Change - cp.sectorChange
+    SELECT t.Change - cp.sectorChange AS beatBySector
     FROM target t JOIN compute cp ON t.Sector = cp.Sector
     WHERE t.Symbol = '${symbol}';
     `;
@@ -675,7 +689,7 @@ async function stock_outperformance_all(req,res){
             FROM Price
         )
     )
-    SELECT t.Change - cp.avgChange
+    SELECT t.Change - cp.avgChange AS beatByAll
     FROM target t JOIN compute cp
     WHERE t.Symbol = '${symbol}';
     `;
@@ -706,7 +720,7 @@ async function stock_rank_sector(req,res){
         FROM target t JOIN Fundamentals f ON f.Sector = t.Sector
         WHERE f.Symbol = '${symbol}'
     )
-    SELECT COUNT(*)
+    SELECT COUNT(*) AS sectorRank
     FROM compute cp
     WHERE cp.Change > (SELECT t.Change FROM target t WHERE t.Symbol = '${symbol}');
     `;
@@ -732,7 +746,7 @@ async function stock_rank_all(req,res){
             FROM Price
         )
     )
-    SELECT COUNT(*)
+    SELECT COUNT(*) AS allRank
     FROM target t
     WHERE t.Change > (SELECT t.Change FROM target t WHERE t.Symbol = '${symbol}');
     `;
@@ -767,7 +781,7 @@ async function stock_momentum_sector(req,res){
         )
         group by f.Sector
     )
-    SELECT t.Volume - cp.sectorVolume
+    SELECT t.Volume - cp.sectorVolume AS volumeBeat
     FROM target t JOIN compute cp ON t.Sector = cp.Sector
     WHERE t.Symbol = '${symbol}';
     `;
@@ -802,7 +816,7 @@ async function stock_momentum_all(req,res){
             FROM Price
         )
     )
-    SELECT t.Volume - cp.avgVolume
+    SELECT t.Volume - cp.avgVolume AS volumeBeatAll
     FROM target t JOIN compute cp
     WHERE t.Symbol = '${symbol}';
     `;
@@ -833,7 +847,7 @@ async function stock_rankm_sector(req,res){
         FROM target t JOIN Fundamentals f ON f.Sector = t.Sector
         WHERE f.Symbol = '${symbol}'
     )
-    SELECT COUNT(*)
+    SELECT COUNT(*) AS volumeRankSector
     FROM compute cp
     WHERE cp.Volume > (SELECT t.Volume FROM target t WHERE t.Symbol = '${symbol}');
     `;
@@ -859,7 +873,7 @@ async function stock_rankm_all(req,res){
             FROM Price
         )
     )
-    SELECT COUNT(*)
+    SELECT COUNT(*) AS volumeRankAll
     FROM target t
     WHERE t.Volume > (SELECT t.Volume FROM target t WHERE t.Symbol = '${symbol}');
     `;
