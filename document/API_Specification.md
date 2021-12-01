@@ -152,7 +152,7 @@ __Return Parameters__: { results (JSON array of { positive (int), negative (int)
 
 __Route 17__: /stockpage/stock 
 __Description__: stock info    
-__Route Parameter(s)__: None  
+__Route Parameter(s)__: symbol(string) 
 __Query Parameter(s)__: None  
 __Route Handler__: stock(req, res)  
 __Return Type__: JSON  
