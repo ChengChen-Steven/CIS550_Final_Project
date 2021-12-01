@@ -32,7 +32,7 @@ app.get('/sectorpage/downchange', routes.top_downchange)
 app.get('/sectorpage/amplitude,', routes.top_amplitude)
 app.get('/sectorpage/turnover', routes.top_turnover)
 app.get('/sectorpage/sector', routes.top_sector)
-app.get('/sectorpage/conitionsector', routes.condition_sector)
+app.get('/sectorpage/conditionsector', routes.condition_sector)
 app.get('/sectorpage/industry', routes.top_industry)
 app.get('/sectorpage/conditionindustry', routes.condition_industry)
 app.get('/sectorpage/firstsector', routes.first_sector)
@@ -51,27 +51,21 @@ app.get('/stockpage/stockmvssector/:symbol',routes.stock_momentum_sector)
 app.get('/stockpage/stockmvsall/:symbol',routes.stock_momentum_all)
 app.get('/stockpage/stockrankmsector/:symbol', routes.stock_rankm_sector)
 app.get('/stockpage/stockrankmall/:symbol', routes.stock_rankm_all)
+
 // Route 2 - register as GET 
 //app.get('/industry/:choice', routes.jersey)
-
 // Route 2 - register as GET 
 //app.get('/jersey/:choice', routes.jersey)
-
 // Route 3 - register as GET 
 //app.get('/matches/:league', routes.all_matches)
-
 // Route 4 - register as GET 
 //app.get('/players', routes.all_players)
-
 // Route 5 - register as GET 
 //app.get('/match', routes.match)
-
 // Route 6 - register as GET 
 //app.get('/player', routes.player)
-
 // Route 7 - register as GET 
 //app.get('/search/matches', routes.search_matches)
-
 // Route 8 - register as GET 
 //app.get('/search/players', routes.search_players)
 
