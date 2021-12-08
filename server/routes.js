@@ -557,38 +557,38 @@ async function condition_firstindustry(req, res) {
 async function search_prices(req, res) {
     const symbol = req.params.symbol
     // search for price history within the dates specified by user
-    var query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+    var query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
                  FROM Price p
                  WHERE Symbol = '${symbol}'
-                 ORDER BY p.Date DESC`
+                 ORDER BY Date DESC`
     if (req.query.StartDate && req.query.EndDate) {
-        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
                  FROM Price p
-                 WHERE Date > '${req.query.StartDate}' AND Date < '${req.query.StartDate}' AND Symbol = '${symbol}'
-                 ORDER BY p.Date DESC`
+                 WHERE Date > '${req.query.StartDate}' AND Date < '${req.query.EndDate}' AND Symbol = '${symbol}'
+                 ORDER BY Date DESC`
     } else if (req.query.StartDate) {
-        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
                  FROM Price p
                  WHERE Date > '${req.query.StartDate}' AND Symbol = '${symbol}'
-                 ORDER BY p.Date DESC`
+                 ORDER BY Date DESC`
     } else if (req.query.EndDate) {
-        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
                  FROM Price p
-                 WHERE Date < '${req.query.StartDate}' AND Symbol = '${symbol}'
-                 ORDER BY p.Date DESC`
+                 WHERE Date < '${req.query.EndDate}' AND Symbol = '${symbol}'
+                 ORDER BY Date DESC`
     } else {
-        query = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
                  FROM Price p
                  WHERE Symbol = '${symbol}'
-                 ORDER BY p.Date DESC`
+                 ORDER BY Date DESC`
     }
     if (req.query.page && !isNaN(req.query.page)) {
         var pagesize = req.query.pagesize ? req.query.pagesize : 10
         var offset_page_size = pagesize * (req.query.page - 1)
-        var query1 = `SELECT p.Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+        var query1 = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
                  FROM Price p
                  WHERE Symbol = '${symbol}'
-                 ORDER BY p.Date DESC
+                 ORDER BY Date DESC
                  LIMIT '${pagesize}' OFFSET '${offset_page_size}'`
         //res.json({results: query})
         connection.query(query1, function (error, results, fields) {
@@ -612,12 +612,69 @@ async function search_prices(req, res) {
 }
 
 
+
+async function search_prices_reversal(req, res) {
+    const symbol = req.params.symbol
+    // search for price history within the dates specified by user
+    var query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Symbol = '${symbol}'
+                 `
+    if (req.query.StartDate && req.query.EndDate) {
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Date > '${req.query.StartDate}' AND Date < '${req.query.EndDate}' AND Symbol = '${symbol}'
+                 ORDER BY Date`
+    } else if (req.query.StartDate) {
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Date > '${req.query.StartDate}' AND Symbol = '${symbol}'
+                 ORDER BY Date`
+    } else if (req.query.EndDate) {
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Date < '${req.query.EndDate}' AND Symbol = '${symbol}'
+                 ORDER BY Date`
+    } else {
+        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Symbol = '${symbol}'
+                 ORDER BY Date`
+    }
+    if (req.query.page && !isNaN(req.query.page)) {
+        var pagesize = req.query.pagesize ? req.query.pagesize : 10
+        var offset_page_size = pagesize * (req.query.page - 1)
+        var query1 = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
+                 FROM Price p
+                 WHERE Symbol = '${symbol}'
+                 LIMIT '${pagesize}' OFFSET '${offset_page_size}'`
+        //res.json({results: query})
+        connection.query(query1, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+    } else {
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+    }
+}
+
 //route 2 stock specs for StockPage
 async function stock(req, res) {
     // display details of specified stock
     const symbol = req.params.symbol
     var query = `
-          SELECT symbol,shortName,exchange,sector,industry,fullTimeEmployees,longBusinessSummary, country
+          SELECT symbol,shortName,exchange,sector,industry,fullTimeEmployees,country,fiftyTwoWeekHigh,fiftyTwoWeekLow,marketCap,trailingPE,priceToSalesTrailing12Months,returnOnEquity
           FROM Fundamentals
           WHERE symbol = '${symbol}';`
             ;
@@ -908,6 +965,7 @@ module.exports = {
     condition_firstindustry,
 
     search_prices,
+    search_prices_reversal,
     stock,
     stock_outperformance_sector,
     stock_outperformance_all,
