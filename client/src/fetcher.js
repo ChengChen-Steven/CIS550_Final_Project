@@ -37,6 +37,13 @@ const getPriceSearch = async (symbol,StartDate,EndDate,page,pagesize) => {
     return res.json()
 }
 
+const getPriceReverseSearch = async (symbol,StartDate,EndDate,page,pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/pricesreverse/${symbol}?StartDate=${StartDate}&EndDate=${EndDate}&page=${page}&pagesize=${pagesize}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
 const getStock = async (symbol,page, pagesize) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/stock/${symbol}`, {
         method: 'GET',
@@ -51,7 +58,7 @@ const getVsSector = async (symbol,page, pagesize) => {
     return res.json()
 }
 
-const getVsAll = async (symbol,page, pagesize) => {
+const getVsAll = async (symbol) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/stockvsall/${symbol}`, {
         method: 'GET',
     })
@@ -99,7 +106,6 @@ const getMRankAll = async (symbol,page, pagesize) => {
     })
     return res.json()
 }
-
 /*
 const getAllMatches = async (page, pagesize, league) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/matches/${league}?page=${page}&pagesize=${pagesize}`, {
@@ -154,5 +160,18 @@ export {
     getPrice,
     getIndexPrice,
     getSector,
-    getAllSectors
+    getAllSectors,
+    
+    getPriceSearch,
+    getPriceReverseSearch,
+    getStock,
+    getVsSector,
+    getVsAll,
+    getMVsAll,
+    getMVsSector,
+    getRankSector,
+    getRankAll,
+    getMRankAll,
+    getMRankSector
+
 }
