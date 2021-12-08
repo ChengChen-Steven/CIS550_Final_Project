@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 
 import HomePage from './pages/HomePage';
-//import PlayersPage from './pages/PlayersPage';
+import PricePage from './pages/PricePage';
 import 'antd/dist/antd.css';
 
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -23,6 +23,11 @@ ReactDOM.render(
 					render={() => (
 						<HomePage />
 					)} />
+		<Route exact
+							path="/stock"
+							render={() => (
+								<PricePage />
+							)}/>
 			</Switch>
 		</Router>
 	</div>,
