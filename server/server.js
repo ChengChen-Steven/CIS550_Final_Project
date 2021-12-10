@@ -26,6 +26,18 @@ app.get('/sector/:sector', routes.sector)
 app.get('/sector', routes.all_sectors)
 
 
+// Route 4 - Search Stock
+app.get('/stocks',routes.all_stocks)
+// http://localhost:8080/stocks
+// http://localhost:8080/stocks/?page=1&pagesize=3
+
+app.get('/search/stocks', routes.search_stocks)
+//http://localhost:8080/search/stocks/?Sector=Healthcare
+//http://localhost:8080/search/stocks/?Size=SmallCap
+
+app.get('/stocks', routes.ticker)
+
+
 //Route 5 for SectorPage
 app.get('/sectorpage/upchange', routes.top_upchange)
 app.get('/sectorpage/downchange', routes.top_downchange)

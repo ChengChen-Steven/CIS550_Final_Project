@@ -944,6 +944,123 @@ async function stock_rankm_all(req,res){
     });
 }
 
+
+//route 11 get a table of all stocks
+async function all_stocks(req, res) {
+    var query = `WITH temp AS (
+        SELECT p.Symbol, p.Close AS Price, p.Change, p.Volume
+        FROM Price AS p
+        WHERE date = (SELECT MAX(Date) FROM Price)),
+        MC AS (
+            SELECT m.symbol, CASE 
+            WHEN m.marketCap between 0 and 2000000000 then 'SmallCap' 
+            WHEN m.marketCap between 2000000000 and 10000000000 then 'MidCap' 
+            WHEN m.marketCap between 10000000000 and 100000000000 then 'LargeCap' 
+            else 'MegaCap' 
+            end as size 
+            from Fundamentals AS m)
+        SELECT row_number() OVER (ORDER BY f.symbol) NO, f.symbol AS Ticker, shortName AS Company, sector AS Sector, 
+        industry AS Industry, country AS Country, size AS Size, ROUND(marketCap, 0) AS MarketCap,
+        ROUND(trailingPE, 2) AS PE, ROUND(Price, 2) AS Price, 
+        CONCAT(ROUND(100.00 * temp.Change, 2), '%') AS 'Change', ROUND(temp.Volume, 0) AS Volume
+        FROM Fundamentals AS f
+        INNER JOIN temp ON temp.Symbol = f.symbol
+        INNER JOIN MC ON MC.Symbol = f.symbol
+        ORDER BY f.symbol`
+    if (req.query.page && !isNaN(req.query.page)) {
+        const page = req.query.page
+        const pagesize = req.query.pagesize ? req.query.pagesize : 20
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                const paginatedData = results.slice(pagesize * (page - 1), pagesize * page)
+                res.json({ results: paginatedData})
+            }
+        })
+    } else {
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+    }
+}
+
+//route 12 select a certain ticker
+async function ticker(req, res) {
+    if (req.query.ticker && !isNaN(req.query.ticker)) {
+        var query = `
+            WITH temp AS (
+                SELECT p.Symbol, p.Close AS Price, p.Change, p.Volume
+                FROM Price AS p
+                WHERE date = (SELECT MAX(Date) FROM Price)
+            )
+            SELECT row_number() OVER (ORDER BY f.symbol) NO, f.symbol AS Ticker, shortName AS Company, sector AS Sector, 
+            industry AS Industry, country AS Country, ROUND(marketCap, 0) AS MarketCap,
+            ROUND(trailingPE, 2) AS PE, ROUND(Price, 2) AS Price, 
+            CONCAT(ROUND(100.00 * temp.Change, 2), '%') AS 'Change', ROUND(temp.Volume, 0) AS Volume
+            FROM Fundamentals AS f
+            INNER JOIN temp ON temp.Symbol = f.symbol
+            WHERE f.symbol = ${req.query.ticker};`
+            ;
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+    } else {
+        res.json([])
+    }
+}
+
+//route 13 search stocks by applying some filters
+async function search_stocks(req, res) {
+    var query1 = "WITH temp AS (SELECT p.Symbol, p.Close AS Price, p.Change, p.Volume FROM Price AS p WHERE date = (SELECT MAX(Date) FROM Price)), MC AS (SELECT m.symbol, CASE WHEN m.marketCap between 0 and 2000000000 then 'SmallCap' when m.marketCap between 2000000000 and 10000000000 then 'MidCap' when m.marketCap between 10000000000 and 100000000000 then 'LargeCap' else 'MegaCap' end as size from Fundamentals AS m) SELECT row_number() OVER (ORDER BY f.symbol) NO, f.symbol AS Ticker, shortName AS Company, sector AS Sector, industry AS Industry, country AS Country, size AS Size, ROUND(f.marketCap, 0) AS MarketCap, ROUND(trailingPE, 2) AS PE, ROUND(Price, 2) AS Price, CONCAT(ROUND(100.00 * temp.Change, 2), '%') AS 'Change', ROUND(temp.Volume, 0) AS Volume FROM Fundamentals AS f INNER JOIN temp ON temp.Symbol = f.symbol INNER JOIN MC ON MC.Symbol = f.symbol"
+    var cond1 = req.query.Ticker ? " AND f.symbol LIKE '" + req.query.Ticker + "%'" : ""
+    var cond2 = req.query.Company ? " AND shortName LIKE '%" + req.query.Company + "%'" : ""
+    var cond3 = req.query.Sector ? " AND sector = '" + req.query.Sector + "'" : ""
+    var cond8 = req.query.Industry ? " AND industry LIKE '%" + req.query.Industry + "%'" : ""
+    var cond9 = req.query.Country ? " AND country LIKE '%" + req.query.Country + "%'" : ""
+    var cond10 = req.query.Size ? " AND MC.Size = '" + req.query.Size + "'" : ""
+    var cond4 = req.query.PriceLow ? " Price >= " + req.query.PriceLow : " Price >= 0 "
+    var cond5 = req.query.PriceHigh ? " AND Price <= " + req.query.PriceHigh : " AND Price <= 100 "
+    var query2 = " ORDER BY f.symbol"
+    if (req.query.page && !isNaN(req.query.page)) {
+        var pagesize = req.query.pagesize ? req.params.pagesize : 10
+        var offset_page_size = pagesize * (req.query.page - 1)
+        var query3 = " LIMIT " + pagesize + " OFFSET " + offset_page_size
+        var query = query1 + cond8 + cond9 + cond10 + cond1 + cond2 + cond3 + query2 + query3
+        res.json({ results: query })
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+    } else {
+        var query = query1 + cond8 + cond9 + cond10 + cond1 + cond2 + cond3 + query2
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+    }
+}
+
+
 module.exports = {
     hello,
     price,
@@ -974,5 +1091,9 @@ module.exports = {
     stock_momentum_sector,
     stock_momentum_all,
     stock_rankm_sector,
-    stock_rankm_all
+    stock_rankm_all,
+
+    all_stocks,
+    ticker,
+    search_stocks
 }

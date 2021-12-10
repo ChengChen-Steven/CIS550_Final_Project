@@ -15,6 +15,7 @@
     "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
     "react-vis": "^1.11.7",
+    "recharts": "^2.1.6",
     "shards-react": "^1.0.3",
     "web-vitals": "^1.1.2"
   },

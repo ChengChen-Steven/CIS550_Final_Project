@@ -106,6 +106,22 @@ const getMRankAll = async (symbol,page, pagesize) => {
     })
     return res.json()
 }
+
+const getStockSearch = async (ticker, company, sector, industry, country, size, market_cap, page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/stocks?Ticker=${ticker}&Company=${company}&Sector=${sector}&Industry=${industry}&Country=${country}&Size=${size}&MarketCap=${market_cap}&page=${page}&pagesize=${pagesize}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+const getTicker = async (ticker) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stock?ticker=${ticker}`, {
+        method: 'GET',
+    })
+    return res.json()
+}
+
+
 /*
 const getAllMatches = async (page, pagesize, league) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/matches/${league}?page=${page}&pagesize=${pagesize}`, {
@@ -172,6 +188,9 @@ export {
     getRankSector,
     getRankAll,
     getMRankAll,
-    getMRankSector
+    getMRankSector,
+
+    getTicker,
+    getStockSearch
 
 }

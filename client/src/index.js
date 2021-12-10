@@ -8,6 +8,7 @@ import {
 
 import HomePage from './pages/HomePage';
 import PricePage from './pages/PricePage';
+import StocksPage from './pages/StocksPage';
 import 'antd/dist/antd.css';
 
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -27,6 +28,11 @@ ReactDOM.render(
 							path="/stock"
 							render={() => (
 								<PricePage />
+							)}/>
+		<Route exact
+							path="/stocks"
+							render={() => (
+								<StocksPage />
 							)}/>
 			</Switch>
 		</Router>
