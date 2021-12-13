@@ -17,7 +17,7 @@ import { format } from 'd3-format';
 
 
 import MenuBar from '../components/MenuBar';
-import {getPriceSearch, getPriceReverseSearch,getStock,getVsAll,getVsSector,getRankSector,getRankAll} from '../fetcher'
+import {getPriceReverseSearch,getStock,getStockOutperform} from '../fetcher'
 const wideFormat = format('.3r');
 
 
@@ -76,7 +76,7 @@ const priceColumns = [
 ];
 
 
-const DataFormater = (number) => {
+const DataFormatter = (number) => {
   if(number > 1000000000){
     return (number/1000000000).toString() + 'B';
   }else if(number > 1000000){
@@ -91,6 +91,7 @@ const DataFormater = (number) => {
 class PricePage extends React.Component {
     constructor(props) {
         super(props)
+        this.ticker = props.match.params.ticker;
         this.state = {
             symbolQuery: '',
             startDateQuery: '',
@@ -121,53 +122,17 @@ class PricePage extends React.Component {
 
 
     updateSearchResults() {
-        getVsSector(this.state.symbolQuery,null,null).then(res =>{
-            this.setState({ vsSectorResult: res.results[0]})
-        })
-        getRankSector(this.state.symbolQuery,null,null).then(res =>{
-            this.setState({ rankSectorResult: res.results[0]})
-        })
-        getRankAll(this.state.symbolQuery,null,null).then(res =>{
-            this.setState({ rankAllResult: res.results[0]})
-        })
-        getVsAll(this.state.symbolQuery,null,null).then(res => {
-            this.setState({ vsAllResults: res.results[0] })
-        })
-
-        getPriceSearch(this.state.symbolQuery, this.state.startDateQuery, this.state.endDateQuery,null, null).then(res => {
-            this.setState({ priceResults: res.results })
-        })
+        this.state.symbolQuery = this.ticker;
 
         getPriceReverseSearch(this.state.symbolQuery, this.state.startDateQuery, this.state.endDateQuery, null, null).then(res => {
             this.setState({ priceReverseResults: res.results })
-        })
-
-        getStock(this.state.symbolQuery,null,null).then(res => {
-            this.setState({ stockResults: res.results[0] })
         })
         //TASK 23: call getPlayerSearch and update playerResults in state. See componentDidMount() for a hint
 
     }
 
     componentDidMount() {
-        getVsAll(this.state.symbolQuery).then(res => {
-            this.setState({ vsAllResults: res.results[0] })
-        })
-
-        getVsSector(this.state.symbolQuery,null,null).then(res =>{
-            this.setState({ vsSectorResult: res.results[0]})
-        })
-        getRankAll(this.state.symbolQuery,null,null).then(res =>{
-            this.setState({ rankAllResult: res.results[0]})
-        })
-        getRankSector(this.state.symbolQuery,null,null).then(res =>{
-            this.setState({ rankSectorResult: res.results[0]})
-        })
-
-
-        getPriceSearch(this.state.symbolQuery, this.state.startDateQuery, this.state.endDateQuery, null, null).then(res => {
-            this.setState({ priceResults: res.results })
-        })
+        this.state.symbolQuery = this.ticker;
 
         getPriceReverseSearch(this.state.symbolQuery, this.state.startDateQuery, this.state.endDateQuery, null, null).then(res => {
             this.setState({ priceReverseResults: res.results })
@@ -175,6 +140,10 @@ class PricePage extends React.Component {
 
         getStock(this.state.symbolQuery,null,null).then(res => {
             this.setState({ stockResults: res.results[0] })
+        })
+
+        getStockOutperform(this.state.symbolQuery,null,null).then(res => {
+            this.setState({ stockPerformResults: res.results[0] })
         })
 
         // TASK 25: call getPlayer with the appropriate parameter and set update the correct state variable.
@@ -190,10 +159,8 @@ class PricePage extends React.Component {
                 <MenuBar />
                 <Form style={{ width: '80vw', margin: '0 auto', marginTop: '5vh' }}>
                     <Row>
-                        <Col flex={2}><FormGroup style={{ width: '20vw', margin: '0 auto' }}>
-                            <label>Symbol</label>
-                            <FormInput placeholder="Symbol" value={this.state.symbolQuery} onChange={this.handleSymbolChange} />
-                        </FormGroup></Col>
+
+
                         <Col flex={2}><FormGroup style={{ width: '20vw', margin: '0 auto' }}>
                             <label>StartDate</label>
                             <FormInput placeholder="YYYY-MM-DD" value={this.state.startDateQuery} onChange={this.handleStartDateChange} />
@@ -208,15 +175,15 @@ class PricePage extends React.Component {
                     <br></br>
                      <Row>
                         {/* TASK 27: Create a column with a label and slider in a FormGroup item for filtering by Potential. See the column above for reference and use the onChange method (handlePotentialChange)  */}
-                        <Col flex={2}><FormGroup style={{ width: '10vw' }}>
-                            <Button style={{ marginTop: '4vh' }} onClick={this.updateSearchResults}>Search</Button>
+                        <Col flex={3}><FormGroup style={{ width: '20vw' }}>
+                            <Button style={{ marginTop: '4vh' }, { marginLeft: '20vh' }} onClick={this.updateSearchResults}>Show Me the Chart</Button>
                         </FormGroup></Col>
 
                     </Row>
                 </Form>
-                <ResponsiveContainer width="100%" height={500} Align = 'right' >
+                <ResponsiveContainer width="100%" height={500} Align = 'center' >
                 <ComposedChart
-                    margin={{ top: 20, right: 20, bottom: 5, left: 0 }}
+                    margin={{ top: 20, right: 20, bottom: 5, left: 30}}
                     data={this.state.priceReverseResults}
                 >
                     <Line yAxisId="left"  type="monotone" dataKey="Close" stroke="#8884d8" dot={false} />
@@ -224,10 +191,30 @@ class PricePage extends React.Component {
                     <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
                     <XAxis dataKey="Date" />
                     <YAxis yAxisId="left"/>
-                    <YAxis yAxisId="right" orientation="right" tickFormatter={DataFormater}/>
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={DataFormatter}/>
                     <Tooltip />
                 </ComposedChart>
             </ResponsiveContainer>
+            {this.state.stockPerformResults ?<div style={{display: 'flex', flexDirection: 'row', width: '70vw', margin: '0 auto',marginTop: '2vh' }}>
+
+                    <Card style={{flex: 1}}>
+
+                        <CardBody>
+                        <Row gutter='30' align='middle' justify = 'center'>
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h5>Benchmarking</h5>
+                            <h7> This stock has moved by <b>{this.state.stockPerformResults.Change.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2})}</b>, <b>{this.state.stockPerformResults.beatByAll<0?this.state.stockPerformResults.beatByAll.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}): '+'+this.state.stockPerformResults.beatByAll.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2})}</b> comparing with market, {this.state.stockPerformResults.beatBySector<0?this.state.stockPerformResults.beatBySector.toLocaleString(undefined, {style: 'percent', minimumFractionDigits:2}): "+"+this.state.stockPerformResults.beatBySector.toLocaleString(undefined, {style: 'percent', minimumFractionDigits:2})} comparing with its sector average,
+                            its trading volume for the last trading day is {this.state.stockPerformResults.Volume.toLocaleString(undefined, {maximumFractionDigits:0})}, {this.state.stockPerformResults.beatVByAll<0?this.state.stockPerformResults.beatVByAll.toLocaleString(undefined, {maximumFractionDigits:0}):"+"+this.state.stockPerformResults.beatVByAll.toLocaleString(undefined, {maximumFractionDigits:0})} comparing with market, {this.state.stockPerformResults.beatVBySector<0?this.state.stockPerformResults.beatVBySector.toLocaleString(undefined, {maximumFractionDigits:0}):"+"+this.state.stockPerformResults.beatVBySector.toLocaleString(undefined, {maximumFractionDigits:0})} comparing with its sector average</h7>
+                            </Col>
+
+                        </Row>
+                        <br></br>
+                       </CardBody>
+
+                    </Card>
+
+
+                 </div> : null}
                 {this.state.stockResults ?<div style={{display: 'flex', flexDirection: 'row', width: '70vw', margin: '0 auto',marginTop: '2vh' }}>
                     <Card style={{flex: 2, marginRight: '2vh'}}>
 
@@ -254,8 +241,15 @@ class PricePage extends React.Component {
                             <h7><b>Full Time Employees: </b>{this.state.stockResults.fullTimeEmployees.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
                             </Col>
                         </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>Description: </b> {this.state.stockResults.longBusinessSummary.substring().split('.')[0]+this.state.stockResults.longBusinessSummary.substring().split('.')[1]+"..."}</h7>
+                            </Col>
+                        </Row>
+
                         <br></br>
                        </CardBody>
+
 
                     </Card>
 
@@ -276,7 +270,7 @@ class PricePage extends React.Component {
                         </Row>
                         <Row gutter='30' align='middle' justify = 'center' >
                             <Col flex={2} style={{ textAlign: 'left' }}>
-                            <h7><b>Market Cap: </b>{this.state.stockResults.marketCap.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            <h7><b>Market Cap: </b>{this.state.stockResults.marketCap.toLocaleString(undefined, {maximumFractionDigits:0})}</h7>
                             </Col>
                         </Row>
                         <Row gutter='30' align='middle' justify = 'center' >
@@ -284,6 +278,41 @@ class PricePage extends React.Component {
                             <h7><b>PE Ratio: </b>{this.state.stockResults.trailingPE.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
                             </Col>
                         </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>PS Ratio: </b>{this.state.stockResults.priceToSalesTrailing12Months.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            </Col>
+                        </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>ROE: </b>{this.state.stockResults.returnOnEquity.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            </Col>
+                        </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>PEG Ratio: </b>{this.state.stockResults.pegRatio.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            </Col>
+                        </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>Enterprise Value: </b>{this.state.stockResults.enterpriseValue.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            </Col>
+                        </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>Book Value: </b>{this.state.stockResults.bookValue.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            </Col>
+                        </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>Beta: </b>{this.state.stockResults.beta.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            </Col>
+                        </Row>
+                        <Row gutter='30' align='middle' justify = 'center' >
+                            <Col flex={2} style={{ textAlign: 'left' }}>
+                            <h7><b>EPS: </b>{this.state.stockResults.trailingEps.toLocaleString(undefined, {maximumFractionDigits:2})}</h7>
+                            </Col>
+                        </Row>
                         <br></br>
                        </CardBody>
 
@@ -292,46 +321,12 @@ class PricePage extends React.Component {
 
                  </div> : null}
 
-               {this.state.vsAllResults ?<div style={{display: 'flex', flexDirection: 'row', width: '70vw', margin: '0 auto',marginTop: '2vh' }}>
 
-                    <Card style={{flex: 1}}>
-
-                        <CardBody>
-                        <Row gutter='30' align='middle' justify = 'center'>
-                            <Col flex={2} style={{ textAlign: 'left' }}>
-                            <h5>Benchmarking:</h5>
-                            <h7> <b>Beat Market By:</b> {this.state.vsAllResults.beatByAll.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2})}</h7>
-                            </Col>
-
-                        </Row>
-                        <Row gutter='30' align='middle' justify = 'center'>
-                            <Col flex={2} style={{ textAlign: 'left' }}>
-                            <h7><b>Beat Sector By:</b> {this.state.vsSectorResult.beatBySector.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2})}</h7>
-                            </Col>
-                        </Row>
-                        <Row gutter='30' align='middle' justify = 'center' >
-                            <Col flex={2} style={{ textAlign: 'left' }}>
-                            <h7><b>Ranking in Market: </b>{this.state.rankAllResult.allRank}</h7>
-                            </Col>
-                        </Row>
-                        <Row gutter='30' align='middle' justify = 'center' >
-                            <Col flex={2} style={{ textAlign: 'left' }}>
-                            <h7><b>Ranking in Sector: </b>{this.state.rankSectorResult.sectorRank}</h7>
-                            </Col>
-                        </Row>
-
-                        <br></br>
-                       </CardBody>
-
-                    </Card>
-
-
-                 </div> : null}
 
 
                 <Divider />
                 {/* TASK 24: Copy in the players table from the Home page, but use the following style tag: style={{ width: '70vw', margin: '0 auto', marginTop: '2vh' }} - this should be one line of code! */}
-                <Table dataSource={this.state.priceResults} columns={priceColumns} pagination={{ pageSizeOptions:[5, 10], defaultPageSize: 5, showQuickJumper:true }} style={{ width: '70vw', margin: '0 auto', marginTop: '2vh' }}/>
+                <Table dataSource={this.state.priceReverseResults} columns={priceColumns} pagination={{ pageSizeOptions:[5, 10], defaultPageSize: 5, showQuickJumper:true }} style={{ width: '70vw', margin: '0 auto', marginTop: '2vh' }}/>
                 <Divider />
 
 

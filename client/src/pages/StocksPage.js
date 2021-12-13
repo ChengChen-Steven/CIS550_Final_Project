@@ -33,7 +33,7 @@ const stockColumns = [
         dataIndex: 'Ticker',
         key: 'Ticker',
         sorter: (a, b) => a.Ticker.localeCompare(b.Ticker),
-        render: (text, row) => <a href={`/stocks?ticker=${row.Ticker}`}>{text}</a>//////
+        render: (text, row) => <a href={`/price/${row.Ticker}`}>{text}</a>//////
     },
     {
         title: 'Company',
