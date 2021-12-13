@@ -615,7 +615,7 @@ async function stock(req, res) {
     // display details of specified stock
     const symbol = req.params.symbol
     var query = `
-          SELECT symbol,shortName,exchange,sector,industry,fullTimeEmployees,country,fiftyTwoWeekHigh,fiftyTwoWeekLow,marketCap,trailingPE,priceToSalesTrailing12Months,returnOnEquity
+          SELECT symbol,shortName,exchange,sector,industry,longBusinessSummary,fullTimeEmployees,country,fiftyTwoWeekHigh,fiftyTwoWeekLow,marketCap,trailingPE,priceToSalesTrailing12Months,returnOnEquity,pegRatio, enterpriseValue, bookValue, beta, trailingEps,priceToBook, heldPercentInstitutions
           FROM Fundamentals
           WHERE symbol = '${symbol}';`
             ;
