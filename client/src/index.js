@@ -25,9 +25,9 @@ ReactDOM.render(
 						<HomePage />
 					)} />
 		<Route exact
-							path="/stock"
-							render={() => (
-								<PricePage />
+							path="/price/:ticker"
+							render={(props) => (
+								<PricePage {...props} />
 							)}/>
 		<Route exact
 							path="/stocks"

@@ -29,14 +29,6 @@ const getAllSectors = async () => {
     return res.json()
 }
 
-
-const getPriceSearch = async (symbol,StartDate,EndDate,page,pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/prices/${symbol}?StartDate=${StartDate}&EndDate=${EndDate}&page=${page}&pagesize=${pagesize}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
-
 const getPriceReverseSearch = async (symbol,StartDate,EndDate,page,pagesize) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/search/pricesreverse/${symbol}?StartDate=${StartDate}&EndDate=${EndDate}&page=${page}&pagesize=${pagesize}`, {
         method: 'GET',
@@ -51,61 +43,14 @@ const getStock = async (symbol,page, pagesize) => {
     return res.json()
 }
 
-const getVsSector = async (symbol,page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockvssector/${symbol}`, {
+const getStockOutperform = async (symbol,page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockoutperform/${symbol}`, {
         method: 'GET',
     })
     return res.json()
 }
 
-const getVsAll = async (symbol) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockvsall/${symbol}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
 
-const getRankSector = async (symbol,page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockranksector/${symbol}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
-
-const getRankAll = async (symbol,page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockrankall/${symbol}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
-
-const getMVsSector = async (symbol,page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockmvssector/${symbol}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
-
-const getMVsAll = async (symbol,page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockmvsall/${symbol}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
-
-const getMRankSector = async (symbol,page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockrankmsector/${symbol}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
-
-const getMRankAll = async (symbol,page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/stockrankmall/${symbol}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
 
 const getStockSearch = async (ticker, company, sector, industry, country, size, market_cap, page, pagesize) => {
     var res = await fetch(`http://${config.server_host}:${config.server_port}/search/stocks?Ticker=${ticker}&Company=${company}&Sector=${sector}&Industry=${industry}&Country=${country}&Size=${size}&MarketCap=${market_cap}&page=${page}&pagesize=${pagesize}`, {
@@ -177,11 +122,10 @@ export {
     getIndexPrice,
     getSector,
     getAllSectors,
-    
-    getPriceSearch,
+
     getPriceReverseSearch,
     getStock,
-    getVsSector,
+    getStockOutperform,
     getVsAll,
     getMVsAll,
     getMVsSector,
