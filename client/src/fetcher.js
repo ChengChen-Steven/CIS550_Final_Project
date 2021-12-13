@@ -126,13 +126,7 @@ export {
     getPriceReverseSearch,
     getStock,
     getStockOutperform,
-    getVsAll,
-    getMVsAll,
-    getMVsSector,
-    getRankSector,
-    getRankAll,
-    getMRankAll,
-    getMRankSector,
+
 
     getTicker,
     getStockSearch
