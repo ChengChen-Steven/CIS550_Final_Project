@@ -554,65 +554,6 @@ async function condition_firstindustry(req, res) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //route 1 search price for StockPage
-async function search_prices(req, res) {
-    const symbol = req.params.symbol
-    // search for price history within the dates specified by user
-    var query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
-                 FROM Price p
-                 WHERE Symbol = '${symbol}'
-                 ORDER BY Date DESC`
-    if (req.query.StartDate && req.query.EndDate) {
-        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
-                 FROM Price p
-                 WHERE Date > '${req.query.StartDate}' AND Date < '${req.query.EndDate}' AND Symbol = '${symbol}'
-                 ORDER BY Date DESC`
-    } else if (req.query.StartDate) {
-        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
-                 FROM Price p
-                 WHERE Date > '${req.query.StartDate}' AND Symbol = '${symbol}'
-                 ORDER BY Date DESC`
-    } else if (req.query.EndDate) {
-        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
-                 FROM Price p
-                 WHERE Date < '${req.query.EndDate}' AND Symbol = '${symbol}'
-                 ORDER BY Date DESC`
-    } else {
-        query = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
-                 FROM Price p
-                 WHERE Symbol = '${symbol}'
-                 ORDER BY Date DESC`
-    }
-    if (req.query.page && !isNaN(req.query.page)) {
-        var pagesize = req.query.pagesize ? req.query.pagesize : 10
-        var offset_page_size = pagesize * (req.query.page - 1)
-        var query1 = `SELECT date_format(p.date, "%Y-%m-%d") as Date, p.Symbol, p.Open, p.Close, p.High, p.Low, p.Volume
-                 FROM Price p
-                 WHERE Symbol = '${symbol}'
-                 ORDER BY Date DESC
-                 LIMIT '${pagesize}' OFFSET '${offset_page_size}'`
-        //res.json({results: query})
-        connection.query(query1, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
-    } else {
-        connection.query(query, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            }
-        });
-    }
-}
-
-
-
 async function search_prices_reversal(req, res) {
     const symbol = req.params.symbol
     // search for price history within the dates specified by user
@@ -691,11 +632,11 @@ async function stock(req, res) {
 }
 
 //route 3 stock performance for StockPage
-async function stock_outperformance_sector(req,res){
+async function stock_outperformance(req,res){
     const symbol = req.params.symbol
     var query = `
     WITH target AS (
-        SELECT p.Symbol, f.Sector, p.Change
+        SELECT p.Symbol, f.Sector, p.Change,p.Volume, AVG(p.Change) OVER() AS avgChange, AVG(p.Volume) OVER() AS avgVolume
         FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
         WHERE Date = (
             SELECT MAX(Date)
@@ -703,236 +644,13 @@ async function stock_outperformance_sector(req,res){
         )
     ),
     compute AS(
-        SELECT f.Sector, AVG(p.Change) AS sectorChange
-        FROM Price p JOIN Fundamentals f ON f.Symbol = p.Symbol
-        WHERE p.Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
+        SELECT f.Sector, AVG(p.Change) AS sectorChange, AVG(p.Volume) AS sectorVolume
+        FROM target p JOIN Fundamentals f ON f.Symbol = p.Symbol
         group by f.Sector
     )
-    SELECT t.Change - cp.sectorChange AS beatBySector
+    SELECT t.Change, t.Volume, t.Change - cp.sectorChange AS beatBySector, t.Volume - cp.sectorVolume AS beatVBySector, t.Change-t.avgChange AS beatByAll, t.Volume-t.avgVolume AS beatVByAll
     FROM target t JOIN compute cp ON t.Sector = cp.Sector
     WHERE t.Symbol = '${symbol}';
-    `;
-    connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    });
-}
-
-
-//route 4 stock performance vs SP500 for StockPage
-async function stock_outperformance_all(req,res){
-    const symbol = req.params.symbol
-    var query = `
-    WITH target AS (
-        SELECT p.Symbol, p.Change
-        FROM Price p
-        WHERE Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    ),
-    compute AS(
-        SELECT AVG(p.Change) AS avgChange
-        FROM Price p
-        WHERE p.Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    )
-    SELECT t.Change - cp.avgChange AS beatByAll
-    FROM target t JOIN compute cp
-    WHERE t.Symbol = '${symbol}';
-    `;
-    connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    });
-}
-
-//route 5 stock rank in sector for StockPage
-async function stock_rank_sector(req,res){
-    const symbol = req.params.symbol
-    var query = `
-    WITH target AS (
-        SELECT p.Symbol, f.Sector, p.Change
-        FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
-        WHERE Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    ),
-    compute AS(
-        SELECT t.Symbol, t.Sector, t.Change
-        FROM target t JOIN Fundamentals f ON f.Sector = t.Sector
-        WHERE f.Symbol = '${symbol}'
-    )
-    SELECT COUNT(*) AS sectorRank
-    FROM compute cp
-    WHERE cp.Change > (SELECT t.Change FROM target t WHERE t.Symbol = '${symbol}');
-    `;
-    connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    });
-}
-
-//route 6 stock rank in SP500 for StockPage
-async function stock_rank_all(req,res){
-    const symbol = req.params.symbol
-    var query = `
-    WITH target AS (
-        SELECT p.Symbol, p.Change
-        FROM Price p
-        WHERE Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    )
-    SELECT COUNT(*) AS allRank
-    FROM target t
-    WHERE t.Change > (SELECT t.Change FROM target t WHERE t.Symbol = '${symbol}');
-    `;
-    connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    });
-}
-
-//route 7 stock momentum vs sector for StockPage
-async function stock_momentum_sector(req,res){
-    const symbol = req.params.symbol
-    var query = `
-    WITH target AS (
-        SELECT p.Symbol, f.Sector, p.Volume
-        FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
-        WHERE Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    ),
-    compute AS(
-        SELECT f.Sector, AVG(p.Volume) AS sectorVolume
-        FROM Price p JOIN Fundamentals f ON f.Symbol = p.Symbol
-        WHERE p.Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-        group by f.Sector
-    )
-    SELECT t.Volume - cp.sectorVolume AS volumeBeat
-    FROM target t JOIN compute cp ON t.Sector = cp.Sector
-    WHERE t.Symbol = '${symbol}';
-    `;
-    connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    });
-}
-
-
-//route 8 stock performance vs SP500 for StockPage
-async function stock_momentum_all(req,res){
-    const symbol = req.params.symbol
-    var query = `
-    WITH target AS (
-        SELECT p.Symbol, p.Volume
-        FROM Price p
-        WHERE Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    ),
-    compute AS(
-        SELECT AVG(p.Volume) AS avgVolume
-        FROM Price p
-        WHERE p.Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    )
-    SELECT t.Volume - cp.avgVolume AS volumeBeatAll
-    FROM target t JOIN compute cp
-    WHERE t.Symbol = '${symbol}';
-    `;
-    connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    });
-}
-
-//route 9 stock rank in sector for StockPage
-async function stock_rankm_sector(req,res){
-    const symbol = req.params.symbol
-    var query = `
-    WITH target AS (
-        SELECT p.Symbol, f.Sector, p.Volume
-        FROM Price p JOIN Fundamentals f ON p.Symbol = f.Symbol
-        WHERE Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    ),
-    compute AS(
-        SELECT t.Symbol, t.Sector, t.Volume
-        FROM target t JOIN Fundamentals f ON f.Sector = t.Sector
-        WHERE f.Symbol = '${symbol}'
-    )
-    SELECT COUNT(*) AS volumeRankSector
-    FROM compute cp
-    WHERE cp.Volume > (SELECT t.Volume FROM target t WHERE t.Symbol = '${symbol}');
-    `;
-    connection.query(query, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        }
-    });
-}
-
-//route 10 stock rank in SP500 for StockPage
-async function stock_rankm_all(req,res){
-    const symbol = req.params.symbol
-    var query = `
-    WITH target AS (
-        SELECT p.Symbol, p.Volume
-        FROM Price p
-        WHERE Date = (
-            SELECT MAX(Date)
-            FROM Price
-        )
-    )
-    SELECT COUNT(*) AS volumeRankAll
-    FROM target t
-    WHERE t.Volume > (SELECT t.Volume FROM target t WHERE t.Symbol = '${symbol}');
     `;
     connection.query(query, function (error, results, fields) {
         if (error) {
@@ -1081,17 +799,9 @@ module.exports = {
     first_industry,
     condition_firstindustry,
 
-    search_prices,
     search_prices_reversal,
     stock,
-    stock_outperformance_sector,
-    stock_outperformance_all,
-    stock_rank_sector,
-    stock_rank_all,
-    stock_momentum_sector,
-    stock_momentum_all,
-    stock_rankm_sector,
-    stock_rankm_all,
+    stock_outperformance,
 
     all_stocks,
     ticker,
