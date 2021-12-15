@@ -118,10 +118,8 @@ class StocksPage extends React.Component {
         this.updateSearchResults = this.updateSearchResults.bind(this)
         this.handleTickerQueryChange = this.handleTickerQueryChange.bind(this)
         this.handleCompanyQueryChange = this.handleCompanyQueryChange.bind(this)
-        // this.handleSectorQueryChange = this.handleSectorQueryChange.bind(this)
         this.handleIndustryQueryChange = this.handleIndustryQueryChange.bind(this)
         this.handleCountryQueryChange = this.handleCountryQueryChange.bind(this)
-        // this.handlePriceChange = this.handlePriceChange.bind(this)
         this.sectorOnChange = this.sectorOnChange.bind(this)/////////
         this.sizeOnChange = this.sizeOnChange.bind(this)
     }
@@ -143,12 +141,6 @@ class StocksPage extends React.Component {
         this.setState({ countryQuery: event.target.value })
     }
 
-    // handlePriceChange(value) {
-    //     this.setState({ priceLowQuery: value[0] })
-    //     this.setState({ priceHighQuery: value[1] })
-    // }
-
-///////////
     sectorOnChange(value) {
         this.setState({sectorQuery: value});
       }
@@ -160,7 +152,6 @@ class StocksPage extends React.Component {
 
 
     updateSearchResults() {
-        //TASK 23: call getPlayerSearch and update playerResults in state. See componentDidMount() for a hint
         getStockSearch(this.state.tickerQuery, this.state.companyQuery, this.state.sectorQuery, this.state.industryQuery, this.state.countryQuery, this.state.sizeQuery, this.state.marketCapQuery, this.state.priceHighQuery, this.state.priceLowQuery, null, null).then(res => {
             this.setState({ stocksResults: res.results })
         })
@@ -194,7 +185,7 @@ class StocksPage extends React.Component {
                             <FormInput placeholder="Company" value={this.state.companyQuery} onChange={this.handleCompanyQueryChange} />
                         </FormGroup></Col>
                         <Col flex={2}><FormGroup style={{ width: '20vw', margin: '0 auto' }}>
-                            <label>Sector</label>
+                            <label>Sector</label><br></br>
                             <Select defaultValue="Any" style={{ width: 210 }} onChange={this.sectorOnChange}>
                                 <Option value="Basic Materials">Basic Materials</Option>
                                 <Option value="Communication Services">Communication Services</Option>
@@ -224,7 +215,7 @@ class StocksPage extends React.Component {
                         </FormGroup></Col>
 
                         <Col flex={2}><FormGroup style={{ width: '20vw', margin: '0 auto' }}>
-                            <label>MarketCapSize</label>
+                            <label>MarketCapSize</label><br></br>
                             <Select defaultValue="Any" style={{ width: 210 }} onChange={this.sizeOnChange}>
                                 <Option value="SmallCap">Small Cap (&lt; $2 billion)</Option>
                                 <Option value="MidCap">Mid Cap ($2 - $10 billion)</Option>
