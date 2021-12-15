@@ -145,7 +145,7 @@ async function top_upchange(req, res) {
             FROM Price   
         )
     )
-    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    SELECT fund.Symbol, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS vary
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.symbol
@@ -175,7 +175,7 @@ async function top_downchange(req, res) {
             FROM Price   
         )
     )
-    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    SELECT fund.Symbol, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS vary
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.symbol
@@ -195,7 +195,8 @@ async function top_downchange(req, res) {
 
 
 // Route c3 for SectorPage
-async function top_amplitude(req, res) {
+
+async function top_maxdropdown(req, res) {
     var query = `
     WITH target AS (
         SELECT p.Symbol, p.Close, p.High, p.Low
@@ -205,7 +206,7 @@ async function top_amplitude(req, res) {
             FROM Price   
         )
     )
-    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND((target.High-target.Low)*100/target.Close, 2),'%') AS '%Amplitude'
+    SELECT fund.Symbol, ROUND(target.Close, 2) AS Close, CONCAT(ROUND((target.High-target.Low)*100/target.Close, 2),'%') AS MaxDropDown
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.symbol
@@ -235,7 +236,7 @@ async function top_turnover(req, res) {
             FROM Price   
         )
     )
-    SELECT fund.Symbol, fund.shortName AS Name, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Volume*100/fund.floatshares, 2),'%') AS '%Turnover'
+    SELECT fund.Symbol, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Volume*100/fund.floatshares, 2),'%') AS Turnover
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.symbol
@@ -265,7 +266,7 @@ async function top_sector(req, res) {
             FROM Price   
         )
     )
-    SELECT fund.sector, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%SectorChange'
+    SELECT SUBSTRING(fund.sector, 1, 14) AS Sector, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS SectorChange
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.Symbol
@@ -297,7 +298,7 @@ async function condition_sector(req, res) {
         )
     ),
     compute AS (
-        SELECT fund.sector, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%SectorChange',
+        SELECT SUBSTRING(fund.sector, 1, 14) AS Sector, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS SectorChange,
            IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)>0,1, 0 ) AS positive,
            IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)<0,1, 0 ) AS negative
         FROM Fundamentals AS fund
@@ -305,7 +306,7 @@ async function condition_sector(req, res) {
         ON fund.symbol = target.Symbol
         GROUP BY fund.sector
         )
-    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*) AS total
     FROM compute
           `
         ;
@@ -331,7 +332,7 @@ async function top_industry(req, res) {
             FROM Price   
         )
     )
-    SELECT fund.industry, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%IndustryChange'
+    SELECT SUBSTRING(fund.industry, 1, 14) AS Industry, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS IndustryChange
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.Symbol
@@ -363,7 +364,7 @@ async function condition_industry(req, res) {
         )
     ),
     compute AS (
-        SELECT fund.industry, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS '%IndustryChange',
+        SELECT SUBSTRING(fund.industry, 1, 14) AS Industry, CONCAT(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2),'%') AS IndustryChange,
            IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)>0,1, 0 ) AS positive,
            IF(ROUND(SUM(target.Change*fund.marketcap*100)/SUM(fund.marketcap), 2)<0,1, 0 ) AS negative
         FROM Fundamentals AS fund
@@ -371,7 +372,7 @@ async function condition_industry(req, res) {
         ON fund.symbol = target.Symbol
         GROUP BY fund.industry
         )
-    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*) AS total
     FROM compute
           `
         ;
@@ -390,14 +391,14 @@ async function condition_industry(req, res) {
 async function first_sector(req, res) {
     var query = `
     WITH target AS (
-        SELECT p.Symbol, p.Change
+        SELECT p.Symbol, p.Close, p.Change
         FROM Price AS p
         WHERE Date = (
             SELECT MAX(Date)
             FROM Price
         )
     )
-    SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    SELECT target.Symbol AS Symbol, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS vary
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.Symbol
@@ -437,7 +438,7 @@ async function condition_firstsector(req, res) {
         )
     ),
     compute AS (
-        SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change',
+        SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS vary,
            IF(ROUND(target.Change*100, 2)>0,1, 0 ) AS positive,
            IF(ROUND(target.Change*100, 2)<0,1, 0 ) AS negative
         FROM Fundamentals AS fund
@@ -453,7 +454,7 @@ async function condition_firstsector(req, res) {
             LIMIT 1
         )
     )            
-    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*) AS total
     FROM compute
           `
         ;
@@ -472,14 +473,14 @@ async function condition_firstsector(req, res) {
 async function first_industry(req, res) {
     var query = `
     WITH target AS (
-        SELECT p.Symbol, p.Change
+        SELECT p.Symbol, p.Close, p.Change
         FROM Price AS p
         WHERE Date = (
             SELECT MAX(Date)
             FROM Price
         )
     )
-    SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change'
+    SELECT target.Symbol AS Symbol, ROUND(target.Close, 2) AS Close, CONCAT(ROUND(target.Change*100, 2),'%') AS vary
     FROM Fundamentals AS fund
     INNER JOIN target
     ON fund.symbol = target.Symbol
@@ -519,7 +520,7 @@ async function condition_firstindustry(req, res) {
         )
     ),
     compute AS (
-        SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS '%Change',
+        SELECT target.Symbol, CONCAT(ROUND(target.Change*100, 2),'%') AS vary,
            IF(ROUND(target.Change*100, 2)>0,1, 0 ) AS positive,
            IF(ROUND(target.Change*100, 2)<0,1, 0 ) AS negative
         FROM Fundamentals AS fund
@@ -535,8 +536,35 @@ async function condition_firstindustry(req, res) {
             LIMIT 1
         )
     )            
-    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*)-SUM(positive)-SUM(negative) AS neutral
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*) AS total
     FROM compute
+          `
+        ;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
+}
+
+// Route m13 for SectorPage
+async function stock_condition(req, res) {
+    var query = `
+    WITH target AS (
+        SELECT p.Symbol,
+        IF(ROUND(p.Change*100, 2)>0,1, 0 ) AS positive,
+        IF(ROUND(p.Change*100, 2)<0,1, 0 ) AS negative        
+        FROM Price AS p
+        WHERE Date = (
+            SELECT MAX(Date) 
+            FROM Price   
+        )
+    )          
+    SELECT SUM(positive) AS positive, SUM(negative) AS negative, COUNT(*) AS total
+    FROM target
           `
         ;
     connection.query(query, function (error, results, fields) {
@@ -788,7 +816,7 @@ module.exports = {
 
     top_upchange,
     top_downchange,
-    top_amplitude,
+    top_maxdropdown,
     top_turnover,
     top_sector,
     condition_sector,
@@ -798,6 +826,7 @@ module.exports = {
     condition_firstsector,
     first_industry,
     condition_firstindustry,
+    stock_condition,
 
     search_prices_reversal,
     stock,

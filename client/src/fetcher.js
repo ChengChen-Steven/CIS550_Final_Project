@@ -66,56 +66,92 @@ const getTicker = async (ticker) => {
     return res.json()
 }
 
-
-/*
-const getAllMatches = async (page, pagesize, league) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/matches/${league}?page=${page}&pagesize=${pagesize}`, {
+const getTopWinner = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/upchange`, {
         method: 'GET',
-    })
+    })  
     return res.json()
 }
 
-const getAllPlayers = async (page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/players?page=${page}&pagesize=${pagesize}`, {
+const getTopLoser = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/downchange`, {
         method: 'GET',
-    })
+    })  
     return res.json()
 }
 
-const getMatch = async (id) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/match?id=${id}`, {
+const getTopAmplitude = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/maxdropdown`, {
         method: 'GET',
-    })
+    })  
+    return res.json()
+}
+const getTopTurnover = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/turnover`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
+const getTopSector = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/sector`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
+const getSectorCondition = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/conditionsector`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
+const getTopIndustry = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/industry`, {
+        method: 'GET',
+    })  
     return res.json()
 }
 
-const getPlayer = async (id) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/player?id=${id}`, {
+const getIndustryCondition = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/conditionindustry`, {
         method: 'GET',
-    })
+    })  
     return res.json()
 }
 
-const getMatchSearch = async (home, away, page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/matches?Home=${home}&Away=${away}&page=${page}&pagesize=${pagesize}`, {
+const getBestSector = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/firstsector`, {
         method: 'GET',
-    })
+    })  
     return res.json()
 }
 
-const getPlayerSearch = async (name, nationality, club, rating_high, rating_low, pot_high, pot_low, page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/players?Name=${name}&Nationality=${nationality}&Club=${club}&RatingLow=${rating_low}&RatingHigh=${rating_high}&PotentialHigh=${pot_high}&PotentialLow=${pot_low}&page=${page}&pagesize=${pagesize}`, {
+const getBestSectorCondition = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/conditionfirstsector`, {
         method: 'GET',
-    })
+    })  
     return res.json()
 }
 
-*/
+const getBestIndustry = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/firstindustry`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
 
+const getBestIndustryCondition = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/conditionfirstindustry`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
 
-
-
-
+const getStockCondition = async () => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/sectorpage/stockcondition`, {
+        method: 'GET',
+    })  
+    return res.json()
+}
 
 export {
     getPrice,
@@ -129,6 +165,19 @@ export {
 
 
     getTicker,
-    getStockSearch
+    getStockSearch,
 
+    getTopWinner,
+    getTopLoser,
+    getTopAmplitude,
+    getTopTurnover,
+    getTopSector,
+    getSectorCondition,
+    getTopIndustry,
+    getIndustryCondition,
+    getBestSector,
+    getBestSectorCondition,
+    getBestIndustry,
+    getBestIndustryCondition,
+    getStockCondition       
 }

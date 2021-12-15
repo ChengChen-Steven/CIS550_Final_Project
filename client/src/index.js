@@ -9,6 +9,8 @@ import {
 import HomePage from './pages/HomePage';
 import PricePage from './pages/PricePage';
 import StocksPage from './pages/StocksPage';
+import SectorPage from "./pages/SectorPage"
+
 import 'antd/dist/antd.css';
 
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -34,6 +36,11 @@ ReactDOM.render(
 							render={() => (
 								<StocksPage />
 							)}/>
+		<Route exact
+							path="/sectorpage"
+							render={() => (
+								<SectorPage />
+							)}/>							
 			</Switch>
 		</Router>
 	</div>,
