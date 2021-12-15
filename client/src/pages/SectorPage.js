@@ -135,7 +135,7 @@ class SectorPage extends React.Component {
                     <Col span={8}>
                         <Card style={{ width: '18rem' }}>
                             <CardHeader>Gainers
-                            <Progress style = {{width: '16vw'}} theme="success" value={this.state.result13.positive} max = {this.state.result13.total}>{this.state.result13.positive}       
+                            <Progress style = {{width: '13vw'}} theme="success" value={this.state.result13.positive} max = {this.state.result13.total}>{this.state.result13.positive}       
                             </Progress>
                             </CardHeader>
                             <CardBody>
@@ -151,7 +151,7 @@ class SectorPage extends React.Component {
                     <Col span={8}>
                         <Card style={{ width: '18rem' }}>
                             <CardHeader>Losers
-                            <Progress style = {{width: '16vw'}} theme="danger" value={this.state.result13.negative} max = {this.state.result13.total}>{this.state.result13.negative}       
+                            <Progress style = {{width: '13vw'}} theme="danger" value={this.state.result13.negative} max = {this.state.result13.total}>{this.state.result13.negative}       
                             </Progress>
                             </CardHeader>
                             <CardBody>
@@ -193,7 +193,7 @@ class SectorPage extends React.Component {
                     <Col span={8}>
                         <Card style={{ width: '18rem' }}>
                         <CardHeader>Sector View
-                        <Progress style = {{width: '16vw'}} multi>
+                        <Progress style = {{width: '13vw'}} multi>
                                     <Progress bar theme="success" value={this.state.result6.positive} max = {this.state.result6.total}>{this.state.result6.positive}</Progress>
                                     <Progress bar theme="danger" value={this.state.result6.negative} max = {this.state.result6.total}>{this.state.result6.negative}</Progress>
                         </Progress>
@@ -210,7 +210,7 @@ class SectorPage extends React.Component {
                     <Col span={8}>
                         <Card style={{ width: '18rem' }}>
                         <CardHeader>Industry View
-                        <Progress style = {{width: '16vw'}} multi>
+                        <Progress style = {{width: '13vw'}} multi>
                                     <Progress bar theme="success" value={this.state.result8.positive} max = {this.state.result8.total}>{this.state.result8.positive}</Progress>
                                     <Progress bar theme="danger" value={this.state.result8.negative} max = {this.state.result8.total}>{this.state.result8.negative}</Progress>
                         </Progress>
@@ -227,7 +227,7 @@ class SectorPage extends React.Component {
                     <Col span={8}>
                         <Card style={{ width: '18rem' }}>
                         <CardHeader>Stocks of Best Sector
-                        <Progress style = {{width: '16vw'}} multi>
+                        <Progress style = {{width: '13vw'}} multi>
                                     <Progress bar theme="success" value={this.state.result10.positive} max = {this.state.result10.total}>{this.state.result10.positive}</Progress>
                                     <Progress bar theme="danger" value={this.state.result10.negative} max = {this.state.result10.total}>{this.state.result10.negative}</Progress>
                         </Progress>
@@ -244,7 +244,7 @@ class SectorPage extends React.Component {
                     <Col span={8}>
                         <Card style={{ width: '18rem' }}>
                         <CardHeader>Stocks of Best Industry
-                        <Progress style = {{width: '16vw'}} multi>
+                        <Progress style = {{width: '13vw'}} multi>
                                     <Progress bar theme="success" value={this.state.result12.positive} max = {this.state.result12.total}>{this.state.result12.positive}</Progress>
                                     <Progress bar theme="danger" value={this.state.result12.negative} max = {this.state.result12.total}>{this.state.result12.negative}</Progress>
                         </Progress>
