@@ -11,7 +11,7 @@ class MenuBar extends React.Component {
     render() {
         return(
             <Navbar type="dark" theme="primary" expand="md">
-        <NavbarBrand href="/">Stock Trading App</NavbarBrand>
+        <NavbarBrand href="/">Buzz S&amp;P 500</NavbarBrand>
           <Nav navbar>
           <NavItem>
               <NavLink active href="/">
